@@ -112,15 +112,24 @@ namespace Underworld.Net
 
         public void QuitGame()
         {
-            StopFlow();
-            _userDisconnect = true;
+            ShutdownForExit();
             Debug.Log($"{NetConstants.ClientLog} Chiusura del gioco.");
-            if (_nm != null && _nm.IsListening) _nm.Shutdown();
             // I server figli vedono che questo processo è chiuso (-parentPid) e si chiudono da soli.
             Application.Quit();
 #if UNITY_EDITOR
             UnityEditor.EditorApplication.isPlaying = false;
 #endif
+        }
+
+        /// <summary>
+        /// Ferma la connessione senza cambiare scena né stato (prima di chiudere il processo:
+        /// QuitGame e i test automatici).
+        /// </summary>
+        public void ShutdownForExit()
+        {
+            StopFlow();
+            _userDisconnect = true;
+            if (_nm != null && _nm.IsListening) _nm.Shutdown();
         }
 
         // ---------------- Flussi ----------------

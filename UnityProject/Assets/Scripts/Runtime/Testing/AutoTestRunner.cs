@@ -249,9 +249,11 @@ namespace Underworld.Testing
         IEnumerator QuitClient(int exitCode)
         {
             var nm = NetworkManager.Singleton;
+            var launcher = GameRoot.Instance != null ? GameRoot.Instance.Launcher : null;
+            if (launcher != null) launcher.ShutdownForExit();
             if (nm != null && nm.IsListening)
             {
-                nm.Shutdown();
+                if (!nm.ShutdownInProgress) nm.Shutdown();
                 float until = Time.realtimeSinceStartup + 2f;
                 while (nm != null && (nm.IsListening || nm.ShutdownInProgress) && Time.realtimeSinceStartup < until) yield return null;
             }

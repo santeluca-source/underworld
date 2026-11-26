@@ -1,0 +1,10 @@
+{
+  "description": "Un trucco solo di test fa correre il giocatore a ~30 m/s: il server se ne accorge e lo rimette all'ultima posizione valida.",
+  "timeoutSec": 120,
+  "servers": [
+    { "area": "TestGround", "autotest": "speed_hack_corrected.server" }
+  ],
+  "clients": [
+    { "name": "Lepre", "autotest": "speed_hack_corrected.client", "graphics": false }
+  ]
+}

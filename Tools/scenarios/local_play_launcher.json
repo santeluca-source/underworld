@@ -1,0 +1,16 @@
+{
+  "description": "Un client chiama GameLauncher.PlayLocal (server figlio su TestGround), arriva in gioco e chiude; il server figlio deve chiudersi entro 10 s.",
+  "timeoutSec": 120,
+  "servers": [],
+  "clients": [
+    {
+      "name": "Locale",
+      "autotest": "local_play_launcher.client",
+      "graphics": false,
+      "server": -1,
+      "args": ["-localport", "{port:5}", "-localdatadir", "{tmp}/localserver", "-localarea", "TestGround"]
+    }
+  ],
+  "checkChildExit": { "client": "Locale", "withinSec": 10 },
+  "extraLogs": ["{tmp}/localserver/server.log"]
+}

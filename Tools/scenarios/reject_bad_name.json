@@ -1,0 +1,8 @@
+{
+  "description": "Un client con il nome 'x' viene rifiutato e riceve il motivo in italiano.",
+  "timeoutSec": 90,
+  "servers": [ { "area": "TestGround" } ],
+  "clients": [
+    { "name": "x", "autotest": "expect_reject", "graphics": false, "args": ["-expect-reason", "name_invalid"] }
+  ]
+}

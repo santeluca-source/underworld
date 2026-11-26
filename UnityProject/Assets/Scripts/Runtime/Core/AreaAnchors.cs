@@ -10,22 +10,6 @@ namespace Underworld.Core
         PoliceStation, Bank, ClothingStore, Hideout, Fence, Robbery, Other,
     }
 
-    /// <summary>
-    /// Punto speciale di un'area (spawn, uscita, negozio, ...). Lo crea il costruttore dell'area.
-    /// Id stabile e uguale su server e client. Formato: "area.tipo.nome", es. "downtown.exit.industrial".
-    /// </summary>
-    public class AreaAnchor : MonoBehaviour
-    {
-        public string Id;
-        public AnchorKind Kind;
-        public float Radius = 2f;
-        /// <summary>Dato libero del modulo (es. prezzo, area di destinazione).</summary>
-        public string Data;
-
-        void OnEnable() => AreaAnchors.Register(this);
-        void OnDisable() => AreaAnchors.Unregister(this);
-    }
-
     /// <summary>Elenco dei punti speciali dell'area caricata.</summary>
     public static class AreaAnchors
     {
