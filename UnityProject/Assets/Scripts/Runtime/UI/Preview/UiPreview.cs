@@ -144,6 +144,7 @@ namespace Underworld.UI
 
         IEnumerator Credits(UiRoot root)
         {
+            root.Menu?.PreviewSetName("Nico");
             yield return new WaitForSecondsRealtime(0.6f);
             UiWindows.Open(CreditsWindow.Id);
             yield return Shot(2.4f);
@@ -178,7 +179,10 @@ namespace Underworld.UI
             else if (window)
             {
                 yield return new WaitForSecondsRealtime(0.5f);
+                // Come farebbe un modulo: finestra e elemento dell'HUD registrati, senza toccare i file della UI.
                 if (!UiRegistry.HasWindow(SampleWindow.Id)) UiRegistry.RegisterWindow(SampleWindow.Id, () => new SampleWindow());
+                UiRegistry.RegisterHudWidget("preview.speed", HudSlot.BottomRight,
+                    () => UiBuild.Text("42 km/h", "uw-prompt__text", UiClasses.Tabular, UiClasses.Shadowed), 10);
                 UiWindows.Open(SampleWindow.Id);
             }
             yield return Shot(pause || window ? 1.0f : 1.3f);
@@ -226,6 +230,8 @@ namespace Underworld.UI
                 AddFooterButton("Chiudi", Close);
                 AddFooterButton("Prendi l'auto", Close, true);
             }
+
+            protected internal override void OnOpened() => Debug.Log("[UiPreview] finestra aperta: " + Title);
 
             void AddRow(string name, string state, bool muted)
             {

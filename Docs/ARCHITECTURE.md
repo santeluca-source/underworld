@@ -203,7 +203,7 @@ public sealed class GarageWindow : UiWindow
         AddFooterButton("Chiudi", Close);
         AddFooterButton("Prendi l'auto", OnTake, primary: true);
     }
-    protected override void OnOpened() { /* aggiorna i dati */ }
+    protected internal override void OnOpened() { /* aggiorna i dati (stesso assembly: "protected internal") */ }
     void OnTake() { /* manda la richiesta al server */ }
 }
 
