@@ -502,6 +502,9 @@ namespace Underworld.Net
             _flow = null;
         }
 
+        /// <summary>Mostra un errore nato fuori dal launcher (es. argomento -connect sbagliato).</summary>
+        internal void ReportFailure(string text) => Fail(text);
+
         void Fail(string text)
         {
             Debug.LogWarning($"{NetConstants.ClientLog} {text}");

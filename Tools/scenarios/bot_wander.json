@@ -1,0 +1,9 @@
+{
+  "description": "Due client con -bot wander girano, corrono e saltano per 10 s: si muovono e il server non li corregge mai (prova anche l'argomento -bot).",
+  "timeoutSec": 90,
+  "servers": [ { "area": "TestGround" } ],
+  "clients": [
+    { "name": "BotUno", "autotest": "bot_wander.client", "graphics": false, "args": ["-bot", "wander"] },
+    { "name": "BotDue", "autotest": "bot_wander.client", "graphics": false, "args": ["-bot", "wander"] }
+  ]
+}

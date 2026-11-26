@@ -107,7 +107,8 @@ namespace Underworld.Net
                     Launcher.Join(ip, port, string.IsNullOrEmpty(args.PlayerName) ? GameLauncher.DefaultPlayerName : args.PlayerName);
                     yield break;
                 }
-                Debug.LogError($"{NetConstants.ClientLog} Indirizzo -connect non valido: '{args.ConnectAddress}' (formato ip:porta).");
+                Debug.LogWarning($"{NetConstants.ClientLog} Indirizzo -connect non valido: '{args.ConnectAddress}' (formato ip:porta).");
+                Launcher.ReportFailure($"Indirizzo non valido: {args.ConnectAddress}. Usa il formato ip:porta.");
             }
 
             LoadMainMenuIfPresent();

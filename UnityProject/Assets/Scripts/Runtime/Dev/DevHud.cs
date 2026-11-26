@@ -21,7 +21,7 @@ namespace Underworld.Dev
                 _style.normal.textColor = Color.white;
             }
             GUI.Label(new Rect(14, 10, 900, 26), "UNDERWORLD - Downtown (prova)", _style);
-            GUI.Label(new Rect(14, 34, 1000, 26), "WASD muovi | Shift corri | Spazio salta | Mouse guarda | Rotella zoom | Esc libera il mouse", _style);
+            GUI.Label(new Rect(14, 34, 1000, 26), "WASD muovi | Shift corri | Spazio salta | Mouse guarda | Rotella zoom", _style);
             GUI.Label(new Rect(14, 58, 300, 26), "FPS " + Mathf.RoundToInt(_fps), _style);
         }
     }
