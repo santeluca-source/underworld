@@ -167,3 +167,52 @@ Per lavorare in parallelo senza conflitti, un modulo aggiunge file suoi e non mo
 ## 14. Stato delle fasi
 
 Vedi `Docs/ROADMAP.md`.
+
+## Note NET
+
+Note della traccia NET (rete, giocatore, test automatici = Fase 4). Scritte il 2026-11-26.
+
+### Avvio (scena Bootstrap)
+- `GameRoot` (Runtime/Net) è sullo stesso oggetto di `NetworkManager`, `UnderworldTransport` e `GameLauncher`. DontDestroyOnLoad; una seconda copia si spegne da sola in `Awake`.
+- Rete: tick 30, approvazione accesa, gestione delle scene accesa, lista prefab `Assets/DefaultNetworkPrefabs.asset`, nessun `PlayerPrefab` (lo spawn lo fa il server).
+- `-server` → `ServerRuntime`; `-connect ip:porta` → `GameLauncher.Join`; altrimenti scena `MainMenu` se è nella build (se manca: avviso e resta). `-autotest` → `AutoTestRunner`.
+- `UnderworldTransport`: con un server su 127.0.0.1 il client apre la porta solo su 127.0.0.1 (niente avviso del firewall nei test).
+
+### Server (`ServerRuntime`)
+- Righe di log con `[Server]`. Pronto: riga `[Server] Pronto` e file `<datadir>/server.ready` (JSON con pid, area, porta).
+- Chiusura pulita: evento `ServerRuntime.ServerStopping` (Fase 5: salvataggi qui), poi `IServerModule.OnServerStopping`, poi giocatori scollegati con il motivo `server_closing`, poi uscita.
+- Motivi di chiusura: processo padre chiuso (`-parentPid`, controllo ogni 0,5 s), file `<datadir>/server.stop` (test e launcher), uscita dell'applicazione.
+- `-maxplayers <n>` cambia il limite di 16 (per i test). Spawn: `AreaAnchor` di tipo `Spawn`, il più libero (`SpawnSelector`), dopo la sincronizzazione della scena del client (`OnSynchronizeComplete`).
+
+### Approvazione e identità (sezione 5, prima parte)
+- Ordine dei controlli (`ConnectionApprovalRules`, logica pura): dimensione (max 2 KB), JSON, versione, identità (GUID + token di 32 byte), nome, server pieno, stesso playerId già dentro, poi i validatori dei moduli.
+- Motivi nel formato `codice|testo` (`DisconnectReasons`): il codice per il programma e i test, il testo in italiano per il giocatore. Il client mostra solo il testo (`GameLauncher.StatusText`, `LastReasonCode`, `LastReasonText`).
+- Punti di estensione per la Fase 5: `ServerApproval.AddValidator(IConnectionValidator)` (hash del token, lucchetto di sessione, ban); `ServerPlayerRegistry.PlayerJoined/PlayerLeft` con `ServerPlayerEntry` (clientId, playerId, nome, ticket, personaggio); `IServerModule` (creato da solo all'avvio del server).
+- Il server non salva ancora niente: hash del token, lucchetti e salvataggi sono della Fase 5.
+
+### Launcher (`GameLauncher`, in `GameServices.Launcher`)
+- `PlayLocal`: avvia lo stesso exe come server figlio (`-server -area Downtown -port <p> -listen 127.0.0.1 -parentPid <pid> -datadir <dir> -batchmode -nographics -logFile <dir>/server.log`), aspetta `server.ready`, poi si collega con nuovi tentativi (attese 0,5 → 3 s) fino a 25 s. Si riprova solo senza risposta o con `server_starting`; un rifiuto vero ferma subito.
+- `HostForFriends`: come PlayLocal ma `-listen 0.0.0.0`; il testo di stato mostra IP di rete e porta. Non è nei test automatici (aprirebbe l'avviso del firewall).
+- Dopo "Esci dalla partita" il server figlio resta acceso e il prossimo PlayLocal lo riusa; si chiude quando il gioco si chiude (`-parentPid`). Se cambiano modo o porta, il vecchio server riceve `server.stop` (poi Kill dopo 5 s).
+- Argomenti per i test: `-localport`, `-localdatadir`, `-localarea`. Nell'editor PlayLocal usa `Builds/Windows/UNDERWORLD.exe` (se manca: messaggio in italiano).
+
+### Giocatore
+- Prefab `Assets/Prefabs/Player.prefab` creato da `PlayerPrefabStep` (ordine 250). Altri moduli aggiungono componenti con `IPlayerPrefabContributor` (Editor/Steps/Player), senza toccare il passo.
+- `NetworkTransform` con autorità del proprietario (posizione xyz + rotazione y, interpolazione). Solo il proprietario ha `CharacterController` e `ThirdPersonController` accesi; le copie remote e quelle del server usano un `CapsuleCollider` semplice.
+- `PlayerNetwork`: nome in una `NetworkVariable` scritta dal server; targhetta col nome per gli altri giocatori; collega la camera della scena (o la crea). Sul proprietario controlla nei primi frame che la posizione sia quella di spawn del server (vedi "Problemi noti").
+- Comandi: `IPlayerInput` (`KeyboardMouseInput` per le persone, `BotInput` per bot e test). Con `InputGate.GameplayBlocked` il controller ignora i comandi e la camera libera il mouse. La camera non gestisce più Esc (lo usa il menu di pausa della UI).
+- `MovementValidator` (server): credito di movimento (`MovementBudget`), a piedi 8,5 m/s, salita 6 m/s, discesa 55 m/s, 1,5 s di credito per la rete a scatti. Violazione → log, contatore, `CorrectPositionRpc` (SendTo.Owner) all'ultima posizione valida; 5 correzioni ignorate → disconnessione `movement_invalid`. API: `SetSpeedAllowance(chiave, velocità)` / `ClearSpeedAllowance` (veicoli), `ServerTeleport`.
+- `RateLimiter` (secchio di gettoni per client e chiave) pronto per le RPC dei moduli.
+
+### Test automatici (sezione 12)
+- `Tools/test.ps1 -Scenario <nome>|all [-PortBase 7700] [-SkipBuild] [-TimeoutSec n] [-Exe percorso]` (PowerShell 5.1). Senza `-SkipBuild` fa prima la build.
+- Ogni scenario usa 10 porte (`PortBase + 10 × indice`), cartelle temporanee in `%TEMP%\underworld-tests\<data>\<scenario>` (log, risultati, profili, dati del server). I log restano per controllarli.
+- Scenari: `connect_two_clients`, `reject_bad_name`, `server_full`, `speed_hack_corrected`, `local_play_launcher`, `bot_wander` (4 bot insieme, nessuna correzione).
+- Nel gioco: `[AutoTestScenario("<scenario>.<ruolo>")]` + `IAutoTestScenario` in `Runtime/Testing/Scenarios/`. `AutoTestContext`: `Check`, `WaitUntil`, `Wait`, `WaitForLocalPlayer`, `WaitForRelease`, `Log`, `SetData`, `LocalPlayer`, `Bot`, `Launcher`, `Server`.
+- Risultato JSON in `-autotest-out`; file `<out>.ingame` quando il personaggio è pronto; `-autotest-timeout` (default 120 s). Client: esce con 0/1. Server: resta acceso fino a `server.stop`, poi esce con 1 se il suo scenario è fallito.
+- Il trucco di velocità (`ThirdPersonController.DebugSpeedMultiplier`) è `internal` e lo usa solo lo scenario `speed_hack_corrected`.
+
+### Problemi noti
+- Una volta (su circa 15 avvii) i due client di `bot_wander`, entrati insieme, hanno visto il loro personaggio in (0,0,0) e tutti i processi si sono bloccati. Ipotesi: stato iniziale vuoto del `NetworkTransform` con autorità del proprietario + due `CharacterController` sovrapposti. Correzioni: un solo `CharacterController` acceso per processo e controllo della posizione di spawn sul proprietario. Dopo le correzioni il problema non si è ripetuto, ma la correzione della posizione non è mai scattata nei test: la causa non è provata.
+- Il controllo di velocità lascia passare circa 1 s di trucco (credito di 14 m) prima di correggere. Da stringere in Fase 12 se serve.
+- `AreaAnchor` è stato spostato nel file `Runtime/Core/AreaAnchor.cs` (stessi membri): nel file `AreaAnchors.cs` Unity non lo salvava nelle scene ("script mancante").
