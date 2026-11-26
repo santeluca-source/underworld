@@ -151,6 +151,35 @@ namespace Underworld.EditorTools
             m.DisableKeyword("_ALPHAMODULATE_ON");
             m.DisableKeyword("_ALPHATEST_ON");
             m.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Geometry;
+            m.SetShaderPassEnabled("DepthOnly", true);
+            m.SetShaderPassEnabled("ShadowCaster", true);
+        }
+
+        /// <summary>
+        /// Superficie trasparente (vetro): alpha blend, niente scrittura della profondità, niente ombre.
+        /// <paramref name="alpha"/> = opacità del vetro.
+        /// </summary>
+        public static void MakeTransparent(Material m, float alpha)
+        {
+            m.SetFloat("_Surface", 1f);
+            m.SetFloat("_Blend", 0f);
+            m.SetFloat("_AlphaClip", 0f);
+            m.SetFloat("_SrcBlend", (float)UnityEngine.Rendering.BlendMode.SrcAlpha);
+            m.SetFloat("_DstBlend", (float)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+            m.SetFloat("_SrcBlendAlpha", (float)UnityEngine.Rendering.BlendMode.One);
+            m.SetFloat("_DstBlendAlpha", (float)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+            m.SetFloat("_ZWrite", 0f);
+            m.SetFloat("_Cull", 0f); // si vede da dentro e da fuori
+            m.SetOverrideTag("RenderType", "Transparent");
+            m.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
+            m.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+            m.DisableKeyword("_ALPHAMODULATE_ON");
+            m.DisableKeyword("_ALPHATEST_ON");
+            m.SetColor("_BaseColor", new Color(1f, 1f, 1f, alpha));
+            m.SetColor("_Color", new Color(1f, 1f, 1f, alpha));
+            m.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
+            m.SetShaderPassEnabled("DepthOnly", false);
+            m.SetShaderPassEnabled("ShadowCaster", false);
         }
     }
 }

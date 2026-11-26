@@ -87,6 +87,8 @@ namespace Underworld.EditorTools
             lib.paletteMatte = LitMaterial("World_PaletteMatte", lit, null, 0.12f, false);
             lib.paletteGloss = LitMaterial("World_PaletteGloss", lit, null, 0.82f, false);
             lib.paletteGlow = LitMaterial("World_PaletteGlow", lit, null, 0.3f, true);
+            lib.paletteClear = LitMaterial("World_PaletteClear", lit, null, 0.9f, false);
+            KenneyMaterials.MakeTransparent(lib.paletteClear, 0.32f);
             lib.carKit = LitMaterial("Kenney_CarKit", lit, AssetDatabase.LoadAssetAtPath<Texture2D>(KenneyPaths.ColormapPath(KenneyKit.CarKit)), 0.35f, false);
             lib.factoryKit = LitMaterial("Kenney_FactoryKit", lit, AssetDatabase.LoadAssetAtPath<Texture2D>(KenneyPaths.ColormapPath(KenneyKit.FactoryKit)), 0.3f, false);
 

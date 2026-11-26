@@ -61,7 +61,7 @@ namespace Underworld.World
         readonly List<UnityEngine.Object> _owned = new List<UnityEngine.Object>();
         readonly Dictionary<Material, int> _flatIndex = new Dictionary<Material, int>();
         WorldHash _hash;
-        Material _matte, _gloss, _glow;
+        Material _matte, _gloss, _glow, _clear;
 
         internal BuildContext(AreaId area, int seed, Transform root, ArtLibrary art, bool graphics, float chunkSize)
         {
@@ -95,6 +95,7 @@ namespace Underworld.World
             _matte = PaletteMaterial(Art != null ? Art.paletteMatte : null, "World_Matte", tex, false);
             _gloss = PaletteMaterial(Art != null ? Art.paletteGloss : null, "World_Gloss", tex, false);
             _glow = PaletteMaterial(Art != null ? Art.paletteGlow : null, "World_Glow", tex, true);
+            _clear = Art != null && Art.paletteClear != null ? PaletteMaterial(Art.paletteClear, "World_Clear", tex, false) : _gloss;
         }
 
         Material PaletteMaterial(Material template, string name, Texture2D tex, bool emissive)
@@ -185,6 +186,8 @@ namespace Underworld.World
             var rot = Quaternion.Euler(0f, yaw, 0f);
             _hash.Add(4); _hash.Add(id); _hash.Add(position); _hash.Add(yaw); _hash.Add(paint); _hash.Add(solid); _hash.Add(scale);
             ModelCount++;
+            // Appoggia il modello a terra: alcuni file (Nature Kit) hanno il fondo un po' sotto lo zero.
+            position.y -= model.bounds.min.y * scale;
 
             if (Graphics) AddModelGeometry(model, position, rot, scale, paint);
 
@@ -193,7 +196,8 @@ namespace Underworld.World
             if (model.collider == ArtCollider.Trunk)
             {
                 float trunk = Mathf.Clamp(Mathf.Min(b.size.x, b.size.z) * 0.18f, 0.2f, 0.6f);
-                AddCollider(position + Vector3.up * (b.max.y * 0.5f), new Vector3(trunk, b.max.y, trunk), rot);
+                float top = b.max.y - b.min.y;
+                AddCollider(position + Vector3.up * (b.min.y + top * 0.5f), new Vector3(trunk, top, trunk), rot);
             }
             else
             {
@@ -347,6 +351,7 @@ namespace Underworld.World
         {
             PalSurface.Gloss => _gloss,
             PalSurface.Glow => _glow,
+            PalSurface.Clear => _clear,
             _ => _matte,
         };
 

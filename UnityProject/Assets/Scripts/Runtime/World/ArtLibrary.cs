@@ -89,6 +89,8 @@ namespace Underworld.World
         public Material paletteMatte;
         public Material paletteGloss;
         public Material paletteGlow;
+        [Tooltip("Vetro trasparente (vetrine).")]
+        public Material paletteClear;
         public Material carKit;
         public Material factoryKit;
 

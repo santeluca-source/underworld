@@ -12,6 +12,8 @@ namespace Underworld.World
         Gloss,
         /// <summary>Luminoso (lampioni, insegne, finestre accese).</summary>
         Glow,
+        /// <summary>Trasparente (vetrine dei negozi e dello showroom: si vede dentro).</summary>
+        Clear,
     }
 
     /// <summary>
@@ -35,6 +37,7 @@ namespace Underworld.World
         AwningRed, AwningGreen, AwningBlue, AwningYellow, AwningStripe,
         FloorTile, FloorDark, Carpet, Rubber, DarkVoid, Plaster,
         LampGlow, WindowGlow, SignRed, SignBlue, SignWhite, SignYellow, SignGreen, BeaconRed, ScreenBlue,
+        GlassClear, Hedge, Leaf,
         Count,
     }
 
@@ -88,6 +91,9 @@ namespace Underworld.World
             Def(Pal.SignWhite, "FFFFFF", PalSurface.Glow); Def(Pal.SignYellow, "FFD25A", PalSurface.Glow);
             Def(Pal.SignGreen, "5AF09A", PalSurface.Glow); Def(Pal.BeaconRed, "FF2A2A", PalSurface.Glow);
             Def(Pal.ScreenBlue, "4AA8FF", PalSurface.Glow);
+            // Vetro trasparente (l'alfa sta nel materiale).
+            Def(Pal.GlassClear, "B8D4E6", PalSurface.Clear);
+            Def(Pal.Hedge, "3F7A3A"); Def(Pal.Leaf, "5C9A48");
         }
 
         static void Def(Pal p, string hex, PalSurface s = PalSurface.Matte)
