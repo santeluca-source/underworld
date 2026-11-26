@@ -107,6 +107,13 @@ namespace Underworld.EditorTools
             cc.center = new Vector3(0, 0.9f, 0);
             cc.stepOffset = 0.4f;
 
+            // Collider delle copie remote (acceso da PlayerNetwork quando il personaggio non è nostro).
+            var remote = player.AddComponent<CapsuleCollider>();
+            remote.height = cc.height;
+            remote.radius = cc.radius;
+            remote.center = cc.center;
+            remote.enabled = false;
+
             var ctrl = player.AddComponent<ThirdPersonController>();
             ctrl.enabled = false; // lo accende PlayerNetwork solo sul proprietario
 
