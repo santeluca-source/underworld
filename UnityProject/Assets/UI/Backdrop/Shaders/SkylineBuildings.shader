@@ -51,7 +51,8 @@ Shader "Underworld/UI/SkylineBuildings"
             {
                 float4 positionCS : SV_POSITION;
                 float2 uv : TEXCOORD0;
-                float4 data : TEXCOORD1;
+                // Costante per faccia: senza interpolazione, così l'hash del palazzo non cambia da pixel a pixel (rumore).
+                nointerpolation float4 data : TEXCOORD1;
                 float3 normalWS : TEXCOORD2;
                 float3 positionWS : TEXCOORD3;
             };

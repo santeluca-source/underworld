@@ -57,9 +57,11 @@ Shader "Underworld/UI/SkylineSky"
                 float day = _UW_DayMix;
                 float3 d = normalize(i.dir);
                 float up = saturate(d.y);
-                float k = pow(up, 0.42);
+                // Alone caldo stretto sopra la città, poi il cielo diventa scuro in fretta.
+                float k = lerp(1.0 - exp(-up * 18.0), pow(up, 0.42), day);
                 float3 zenith = lerp(_ZenithNight.rgb, _ZenithDay.rgb, day);
-                float3 horizon = lerp(_HorizonNight.rgb, _HorizonDay.rgb, day);
+                // Di notte l'orizzonte ha lo stesso colore della foschia: niente banda netta dove finisce la città.
+                float3 horizon = lerp(_UW_FogColor.rgb, _HorizonDay.rgb, day);
                 float3 col = lerp(horizon, zenith, k);
                 // Sotto l'orizzonte: lo stesso colore della foschia (la città sparisce nella nebbia).
                 col = lerp(col, _UW_FogColor.rgb, saturate(-d.y * 8.0));

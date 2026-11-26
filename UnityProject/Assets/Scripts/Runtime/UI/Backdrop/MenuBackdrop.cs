@@ -72,8 +72,8 @@ namespace Underworld.UI
             }
             else
             {
-                Shader.SetGlobalColor("_UW_FogColor", new Color(0.235f, 0.188f, 0.2f));
-                Shader.SetGlobalVector("_UW_FogParams", new Vector4(0.0019f, 10f, 0.010f, 0.92f));
+                Shader.SetGlobalColor("_UW_FogColor", new Color(0.150f, 0.105f, 0.100f));
+                Shader.SetGlobalVector("_UW_FogParams", new Vector4(0.0017f, 10f, 0.010f, 0.86f));
                 Shader.SetGlobalVector("_UW_LightDir", new Vector4(-0.45f, 0.32f, 0.83f, 0f));
             }
             if (targetCamera != null)

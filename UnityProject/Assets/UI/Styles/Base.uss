@@ -67,7 +67,8 @@
 }
 
 .uw-text-shadow {
-    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.65);
+    /* Ombra corta e scura: il testo dell'HUD si legge anche sul cielo chiaro, senza vetro dietro. */
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.80);
 }
 
 /* Le etichette di Unity hanno margini e padding: li tolgo per avere misure precise. */
@@ -230,6 +231,13 @@
 .uw-textfield {
     margin: 0;
     height: var(--uw-control-height);
+    /* Il tema standard colora di blu il bordo del campo attivo: qui diventa l'accento. */
+    --unity-colors-input_field-border-focus: var(--uw-accent);
+}
+
+.uw-root .uw-textfield:focus > .unity-base-text-field__input,
+.uw-root .uw-textfield:focus:enabled > .unity-base-field__input {
+    border-color: var(--uw-accent);
 }
 
 .uw-textfield .unity-base-text-field__input {
@@ -293,6 +301,15 @@
 .uw-status__head {
     flex-direction: row;
     align-items: center;
+}
+
+/* Un titolo accanto a un'icona deve occupare il resto della riga, altrimenti UI Toolkit
+   lo manda a capo troppo presto e la riga non cresce (testo sovrapposto). */
+.uw-status__head > Label,
+.uw-view-header > Label {
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-width: 0;
 }
 
 .uw-status__head > .uw-icon {

@@ -7,7 +7,9 @@
 
 .uw-menu {
     flex-direction: column;
-    justify-content: center;
+    /* Titolo in un punto fisso: cambiando vista (unisciti, attesa, errore) non salta. */
+    justify-content: flex-start;
+    padding-top: 196px;
     padding-left: 128px;
     padding-bottom: 40px;
 }
@@ -176,7 +178,7 @@
     position: absolute;
     top: 32px;
     left: 40px;
-    max-width: 480px;
+    width: 480px;
     flex-direction: column;
     align-items: flex-start;
 }
@@ -208,16 +210,16 @@
     -unity-font-definition: url("../Fonts/Inter-SemiBold.ttf");
     font-size: var(--uw-type-28);
     color: var(--uw-accent);
-    margin-left: var(--uw-space-2);
-    margin-bottom: 3px;
+    margin-left: 6px;
+    margin-bottom: 6px;
 }
 
 .uw-cash--gain .uw-cash__value {
-    color: rgb(178, 240, 202);
+    color: rgb(214, 248, 226);
 }
 
 .uw-cash--loss .uw-cash__value {
-    color: rgb(250, 190, 180);
+    color: rgb(252, 214, 208);
 }
 
 .uw-cash__delta {
@@ -239,7 +241,8 @@
 
 .uw-wanted__star {
     margin-left: var(--uw-space-1);
-    color: rgba(255, 255, 255, 0.30);
+    /* Grigio medio: si vede sia sul cielo chiaro sia di notte. */
+    color: rgba(128, 132, 140, 0.70);
 }
 
 .uw-wanted__star--on {
@@ -327,6 +330,8 @@
 .uw-objective {
     flex-direction: row;
     align-items: flex-start;
+    /* Larga quanto la colonna: così il testo va a capo solo quando serve davvero. */
+    align-self: stretch;
 }
 
 .uw-objective__icon {
@@ -341,6 +346,7 @@
     color: var(--uw-text);
     white-space: normal;
     flex-shrink: 1;
+    flex-grow: 1;
 }
 
 /* Suggerimento "E" */
