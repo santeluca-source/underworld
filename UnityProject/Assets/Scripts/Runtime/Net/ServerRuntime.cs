@@ -54,7 +54,9 @@ namespace Underworld.Net
 
         Process _parent;
         int _parentPid;
-        float _nextParentCheck;
+        float _nextWatchdogCheck;
+        string _readyFile;
+        string _stopFile;
 
         /// <summary>Quante volte un motivo di rifiuto è stato usato.</summary>
         public int RejectionCount(string code) => code != null && _rejections.TryGetValue(code, out int n) ? n : 0;
@@ -78,10 +80,20 @@ namespace Underworld.Net
 
             Debug.Log($"{NetConstants.ServerLog} Avvio: area {Area}, ascolto {ListenAddress}:{Port}, massimo {MaxPlayers} giocatori, dati in {DataDir}.");
 
-            try { Directory.CreateDirectory(DataDir); }
+            try
+            {
+                Directory.CreateDirectory(DataDir);
+                _readyFile = Path.Combine(DataDir, NetConstants.ReadyFileName);
+                _stopFile = Path.Combine(DataDir, NetConstants.StopFileName);
+                // File rimasti da un avvio precedente: non devono ingannare chi aspetta.
+                if (File.Exists(_readyFile)) File.Delete(_readyFile);
+                if (File.Exists(_stopFile)) File.Delete(_stopFile);
+            }
             catch (Exception e)
             {
-                Debug.LogError($"{NetConstants.ServerLog} Cartella dati non creata: {DataDir} ({e.Message}).");
+                Debug.LogError($"{NetConstants.ServerLog} Cartella dati non valida: {DataDir} ({e.Message}).");
+                _readyFile = null;
+                _stopFile = null;
                 StopServer("cartella dati non valida", 1);
                 return;
             }
@@ -139,9 +151,43 @@ namespace Underworld.Net
             });
 
             int spawns = AreaAnchors.OfKind(AnchorKind.Spawn).Count;
+            WriteReadyFile();
             Debug.Log($"{NetConstants.ServerReadyMarker}: area {Area} ({_sceneName}) su {ListenAddress}:{Port}, punti di spawn: {spawns}.");
             try { ServerReady?.Invoke(); }
             catch (Exception e) { Debug.LogException(e); }
+        }
+
+        /// <summary>Scrive il file "pronto" (pid, area, porta) per chi aspetta il server.</summary>
+        void WriteReadyFile()
+        {
+            if (string.IsNullOrEmpty(_readyFile)) return;
+            try
+            {
+                int pid;
+                using (var me = Process.GetCurrentProcess()) pid = me.Id;
+                string json = "{\"pid\":" + pid + ",\"area\":\"" + Area + "\",\"port\":" + Port +
+                              ",\"listen\":\"" + ListenAddress + "\"}";
+                string tmp = _readyFile + ".tmp";
+                File.WriteAllText(tmp, json);
+                if (File.Exists(_readyFile)) File.Delete(_readyFile);
+                File.Move(tmp, _readyFile);
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"{NetConstants.ServerLog} File 'pronto' non scritto: {e.Message}");
+            }
+        }
+
+        void DeleteReadyFile()
+        {
+            try
+            {
+                if (!string.IsNullOrEmpty(_readyFile) && File.Exists(_readyFile)) File.Delete(_readyFile);
+            }
+            catch (Exception)
+            {
+                // Non importante: il prossimo avvio lo cancella comunque.
+            }
         }
 
         // ---------------- Approvazione ----------------
@@ -286,16 +332,30 @@ namespace Underworld.Net
 
         void Update()
         {
-            if (_parent == null || IsStopping) return;
-            if (Time.realtimeSinceStartup < _nextParentCheck) return;
-            _nextParentCheck = Time.realtimeSinceStartup + 1f;
-            bool exited;
-            try { exited = _parent.HasExited; }
-            catch (Exception) { exited = true; }
-            if (exited)
+            if (IsStopping) return;
+            if (Time.realtimeSinceStartup < _nextWatchdogCheck) return;
+            _nextWatchdogCheck = Time.realtimeSinceStartup + 0.5f;
+
+            if (_parent != null)
             {
-                Debug.Log($"{NetConstants.ServerLog} Il processo padre {_parentPid} si è chiuso: chiudo il server.");
-                StopServer("processo padre chiuso", 0);
+                bool exited;
+                try { exited = _parent.HasExited; }
+                catch (Exception) { exited = true; }
+                if (exited)
+                {
+                    Debug.Log($"{NetConstants.ServerLog} Il processo padre {_parentPid} si è chiuso: chiudo il server.");
+                    StopServer("processo padre chiuso", 0);
+                    return;
+                }
+            }
+
+            // Richiesta di chiusura con un file (test automatici, launcher).
+            if (!string.IsNullOrEmpty(_stopFile) && File.Exists(_stopFile))
+            {
+                try { File.Delete(_stopFile); }
+                catch (Exception) { /* lo ignoro: chiudo comunque */ }
+                Debug.Log($"{NetConstants.ServerLog} Richiesta di chiusura ricevuta ({NetConstants.StopFileName}).");
+                StopServer("richiesta di chiusura", 0);
             }
         }
 
@@ -320,6 +380,12 @@ namespace Underworld.Net
 
         IEnumerator ShutdownAndQuit(int exitCode)
         {
+            DeleteReadyFile();
+            // Test automatico del server: se non è finito, conta come fallito; un test fallito esce con 1.
+            var runner = Underworld.Testing.AutoTestRunner.Instance;
+            if (runner != null && !Underworld.Testing.AutoTestRunner.Finished)
+                runner.AbortAndFinish("server chiuso prima della fine dello scenario");
+            if (exitCode == 0 && Underworld.Testing.AutoTestRunner.Failed) exitCode = 1;
             if (_nm != null && _nm.IsListening)
             {
                 var ids = new List<ulong>(_nm.ConnectedClientsIds);
@@ -342,6 +408,7 @@ namespace Underworld.Net
             if (IsStopping) return;
             IsStopping = true;
             Debug.Log($"{NetConstants.ServerLog} Chiusura (uscita dell'applicazione).");
+            DeleteReadyFile();
             RaiseStopping();
         }
 

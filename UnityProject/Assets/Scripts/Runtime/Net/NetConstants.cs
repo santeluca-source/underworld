@@ -35,6 +35,18 @@ namespace Underworld.Net
         /// <summary>Nome della scena del menu (la crea il modulo UI).</summary>
         public const string MainMenuScene = "MainMenu";
 
+        /// <summary>
+        /// File scritto dal server nella sua cartella dati quando è pronto (JSON con pid, area, porta).
+        /// Lo leggono GameLauncher (Gioca) e Tools/test.ps1.
+        /// </summary>
+        public const string ReadyFileName = "server.ready";
+
+        /// <summary>
+        /// Se questo file compare nella cartella dati, il server si chiude in modo pulito
+        /// (salva e scollega i giocatori). Lo usano Tools/test.ps1 e GameLauncher.
+        /// </summary>
+        public const string StopFileName = "server.stop";
+
         /// <summary>Nome della scena di avvio (indice 0 della build).</summary>
         public const string BootstrapScene = "Bootstrap";
     }
