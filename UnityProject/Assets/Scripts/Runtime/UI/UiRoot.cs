@@ -254,8 +254,8 @@ namespace Underworld.UI
         {
             // Con un menu o una finestra aperti il mouse deve essere libero (anche se un altro script lo blocca).
             if (!WantsCursor) return;
-            if (Cursor.lockState != CursorLockMode.None) Cursor.lockState = CursorLockMode.None;
-            if (!Cursor.visible) Cursor.visible = true;
+            if (UnityEngine.Cursor.lockState != CursorLockMode.None) UnityEngine.Cursor.lockState = CursorLockMode.None;
+            if (!UnityEngine.Cursor.visible) UnityEngine.Cursor.visible = true;
         }
 
         void HandleEscape()

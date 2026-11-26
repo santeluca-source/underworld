@@ -134,7 +134,7 @@ namespace Underworld.UI
             if (el == null) return;
             el.style.display = DisplayStyle.Flex;
             var tw = Tweener;
-            if (tw == null) { Apply(el, 1f, Vector2.zero, 1f); done?.Invoke(); return; }
+            if (tw == null) { ClearInline(el); done?.Invoke(); return; }
 
             bool wasRunning = tw.IsRunning(el, ChannelVisibility);
             float startOpacity = wasRunning ? el.style.opacity.value : 0f;
@@ -150,7 +150,20 @@ namespace Underworld.UI
             tw.Start(el, ChannelVisibility, duration, ease, k =>
             {
                 Apply(el, Mathf.Lerp(startOpacity, 1f, k), Vector2.Lerp(startPos, Vector2.zero, k), Mathf.Lerp(startScale, 1f, k));
-            }, done, delay);
+            }, () =>
+            {
+                // Alla fine tolgo gli stili in linea: così valgono di nuovo quelli del USS (es. :active a 0,97).
+                ClearInline(el);
+                done?.Invoke();
+            }, delay);
+        }
+
+        /// <summary>Toglie opacità, spostamento e scala scritti dal codice (torna lo stile del USS).</summary>
+        public static void ClearInline(VisualElement el)
+        {
+            el.style.opacity = StyleKeyword.Null;
+            el.style.translate = StyleKeyword.Null;
+            el.style.scale = StyleKeyword.Null;
         }
 
         /// <summary>
@@ -190,7 +203,7 @@ namespace Underworld.UI
         {
             if (el == null) return;
             Tweener?.Cancel(el, ChannelVisibility);
-            Apply(el, visible ? 1f : 0f, Vector2.zero, 1f);
+            if (visible) ClearInline(el); else Apply(el, 0f, Vector2.zero, 1f);
             el.style.display = visible ? DisplayStyle.Flex : DisplayStyle.None;
         }
 
@@ -220,7 +233,7 @@ namespace Underworld.UI
                 float s = k < 0.35f ? Easing.Apply(Ease.OutCubic, k / 0.35f) : 1f - Easing.Apply(Ease.InOutCubic, (k - 0.35f) / 0.65f);
                 float v = 1f + (peak - 1f) * s;
                 el.style.scale = new Scale(new Vector3(v, v, 1f));
-            }, () => el.style.scale = new Scale(Vector3.one));
+            }, () => el.style.scale = StyleKeyword.Null);
         }
 
         /// <summary>Anima un valore qualsiasi (es. il contatore dei soldi).</summary>

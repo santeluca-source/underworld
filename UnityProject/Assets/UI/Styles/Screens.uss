@@ -1,0 +1,402 @@
+/*
+  Schermate: menu principale, caricamento, pausa, HUD, avvisi.
+  Un solo pannello di vetro per schermata (menu, pausa). L'HUD resta quieto: testo con ombra, niente vetro.
+*/
+
+/* ============================================================ menu principale */
+
+.uw-menu {
+    flex-direction: column;
+    justify-content: center;
+    padding-left: 128px;
+    padding-bottom: 40px;
+}
+
+.uw-menu__title-block {
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.uw-menu__title {
+    -unity-font-definition: url("../Fonts/Inter-SemiBold.ttf");
+    font-size: var(--uw-type-display);
+    letter-spacing: 8px;
+    margin-left: -8px;
+    color: var(--uw-text);
+    text-shadow: 0 4px 24px rgba(0, 0, 0, 0.55);
+}
+
+.uw-menu__tagline {
+    margin-top: var(--uw-space-1);
+    font-size: var(--uw-type-20);
+    color: var(--uw-text-muted);
+    text-shadow: 0 1px 8px rgba(0, 0, 0, 0.6);
+}
+
+.uw-menu__panel {
+    width: var(--uw-panel-width);
+    margin-top: var(--uw-space-6);
+    padding: 28px;
+}
+
+.uw-menu__view {
+    flex-direction: column;
+}
+
+.uw-menu__actions {
+    flex-direction: column;
+    margin-top: var(--uw-space-5);
+    margin-bottom: -8px;
+}
+
+.uw-menu__actions > .uw-btn {
+    margin-bottom: var(--uw-space-2);
+}
+
+.uw-menu__actions-row {
+    flex-direction: row;
+    margin-top: var(--uw-space-5);
+}
+
+.uw-menu__actions-row > .uw-btn {
+    margin-right: var(--uw-space-2);
+}
+
+.uw-menu__secondary {
+    flex-direction: row;
+    justify-content: space-between;
+    margin-top: var(--uw-space-4);
+    margin-left: -12px;
+    margin-right: -12px;
+    margin-bottom: -8px;
+}
+
+.uw-menu__row {
+    flex-direction: row;
+}
+
+.uw-menu__port {
+    width: 116px;
+    margin-left: var(--uw-space-3);
+}
+
+.uw-menu__join-hint {
+    margin-top: var(--uw-space-1);
+}
+
+.uw-view-header {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: var(--uw-space-5);
+    margin-left: -8px;
+}
+
+.uw-view-header__back {
+    margin-right: var(--uw-space-1);
+}
+
+.uw-menu__footer {
+    position: absolute;
+    left: 128px;
+    bottom: 40px;
+}
+
+/* ============================================================ caricamento */
+
+.uw-loading {
+    background-color: rgba(8, 9, 12, 0.94);
+    align-items: center;
+    justify-content: center;
+}
+
+.uw-loading__center {
+    width: 460px;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.uw-loading__text {
+    margin-top: var(--uw-space-3);
+    white-space: normal;
+}
+
+.uw-loading__back {
+    margin-top: var(--uw-space-5);
+    min-width: 180px;
+}
+
+/* ============================================================ pausa */
+
+.uw-pause {
+    align-items: center;
+    justify-content: center;
+}
+
+.uw-pause__panel {
+    width: 380px;
+    padding: 28px;
+}
+
+.uw-pause__head {
+    flex-direction: column;
+}
+
+.uw-pause__title {
+    -unity-font-definition: url("../Fonts/Inter-SemiBold.ttf");
+    font-size: var(--uw-type-28);
+}
+
+.uw-pause__context {
+    margin-top: var(--uw-space-1);
+}
+
+.uw-pause__list {
+    flex-direction: column;
+    margin-top: var(--uw-space-5);
+}
+
+.uw-pause__list > .uw-btn {
+    margin-bottom: var(--uw-space-2);
+}
+
+.uw-pause__hint {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    margin-top: var(--uw-space-3);
+}
+
+.uw-pause__hint > .uw-keycap {
+    margin-right: var(--uw-space-2);
+}
+
+/* ============================================================ HUD */
+
+.uw-hud__left {
+    position: absolute;
+    top: 32px;
+    left: 40px;
+    max-width: 480px;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.uw-hud__right {
+    position: absolute;
+    top: 28px;
+    right: 40px;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+/* Soldi */
+.uw-cash {
+    flex-direction: row;
+    align-items: flex-end;
+    transform-origin: 100% 50%;
+}
+
+.uw-cash__value {
+    font-size: var(--uw-type-40);
+    color: var(--uw-text);
+    transition-property: color;
+    transition-duration: 0.2s;
+    transition-timing-function: ease-out-cubic;
+}
+
+.uw-cash__currency {
+    -unity-font-definition: url("../Fonts/Inter-SemiBold.ttf");
+    font-size: var(--uw-type-28);
+    color: var(--uw-accent);
+    margin-left: var(--uw-space-2);
+    margin-bottom: 3px;
+}
+
+.uw-cash--gain .uw-cash__value {
+    color: rgb(178, 240, 202);
+}
+
+.uw-cash--loss .uw-cash__value {
+    color: rgb(250, 190, 180);
+}
+
+.uw-cash__delta {
+    font-size: var(--uw-type-16);
+    color: var(--uw-success);
+    margin-top: 2px;
+}
+
+.uw-cash__delta--loss {
+    color: var(--uw-danger);
+}
+
+/* Ricercato */
+.uw-wanted {
+    flex-direction: row;
+    margin-top: var(--uw-space-2);
+    margin-right: -2px;
+}
+
+.uw-wanted__star {
+    margin-left: var(--uw-space-1);
+    color: rgba(255, 255, 255, 0.30);
+}
+
+.uw-wanted__star--on {
+    color: var(--uw-accent);
+}
+
+/* Avvisi (dentro l'HUD sotto i soldi, altrimenti in alto a destra) */
+.uw-hud__toasts {
+    margin-top: var(--uw-space-4);
+    align-items: flex-end;
+}
+
+.uw-overlay-toasts {
+    position: absolute;
+    top: 28px;
+    right: 40px;
+    align-items: flex-end;
+}
+
+.uw-toasts {
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.uw-toast {
+    flex-direction: row;
+    align-items: center;
+    max-width: 380px;
+    margin-bottom: var(--uw-space-2);
+    padding: 10px 16px 10px 12px;
+    border-radius: var(--uw-radius-control);
+    background-color: var(--uw-toast-fill);
+    overflow: hidden;
+}
+
+.uw-toast__icon {
+    margin-right: 10px;
+    color: var(--uw-info);
+}
+
+.uw-toast__text {
+    font-size: var(--uw-type-16);
+    color: var(--uw-text);
+    white-space: normal;
+    flex-shrink: 1;
+}
+
+.uw-toast--success .uw-toast__icon {
+    color: var(--uw-success);
+}
+
+.uw-toast--warning .uw-toast__icon {
+    color: var(--uw-warning);
+}
+
+.uw-toast--error .uw-toast__icon {
+    color: var(--uw-danger);
+}
+
+/* Nome dell'area */
+.uw-area {
+    position: absolute;
+    top: 128px;
+    left: 0;
+    right: 0;
+    align-items: center;
+}
+
+.uw-area__name {
+    -unity-font-definition: url("../Fonts/Inter-SemiBold.ttf");
+    font-size: var(--uw-type-40);
+    letter-spacing: 3px;
+    color: var(--uw-text);
+}
+
+.uw-area__rule {
+    width: 48px;
+    height: 2px;
+    margin-top: var(--uw-space-3);
+    border-radius: 1px;
+    background-color: var(--uw-accent);
+}
+
+/* Obiettivo */
+.uw-objective {
+    flex-direction: row;
+    align-items: flex-start;
+}
+
+.uw-objective__icon {
+    color: var(--uw-accent);
+    margin-right: 10px;
+    margin-top: 3px;
+}
+
+.uw-objective__text {
+    -unity-font-definition: url("../Fonts/Inter-SemiBold.ttf");
+    font-size: var(--uw-type-20);
+    color: var(--uw-text);
+    white-space: normal;
+    flex-shrink: 1;
+}
+
+/* Suggerimento "E" */
+.uw-hud__bottom {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 72px;
+    align-items: center;
+}
+
+.uw-prompt {
+    flex-direction: row;
+    align-items: center;
+}
+
+.uw-prompt > .uw-keycap {
+    margin-right: var(--uw-space-3);
+}
+
+.uw-prompt__text {
+    -unity-font-definition: url("../Fonts/Inter-SemiBold.ttf");
+    font-size: var(--uw-type-20);
+    color: var(--uw-text);
+}
+
+/* Zone per i moduli */
+.uw-hud__slot {
+    flex-direction: column;
+}
+
+.uw-hud__slot--top-left {
+    margin-top: var(--uw-space-4);
+    align-items: flex-start;
+}
+
+.uw-hud__slot--top-right {
+    margin-top: var(--uw-space-2);
+    align-items: flex-end;
+}
+
+.uw-hud__slot--bottom-left {
+    position: absolute;
+    left: 40px;
+    bottom: 40px;
+    align-items: flex-start;
+}
+
+.uw-hud__slot--bottom-right {
+    position: absolute;
+    right: 40px;
+    bottom: 40px;
+    align-items: flex-end;
+}
+
+.uw-hud__slot--bottom-center {
+    align-items: center;
+    margin-bottom: var(--uw-space-3);
+}

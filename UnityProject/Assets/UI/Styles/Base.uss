@@ -1,0 +1,496 @@
+/*
+  Elementi comuni: radice, testi, vetro, pulsanti, campi, icone, finestre.
+  Regole del vault: niente gradienti, pochi bordi, niente maiuscolo nei sottotitoli,
+  pressione a scala 0,97, transizioni brevi in ease-out.
+*/
+
+/* ------------------------------------------------------------ radice e livelli */
+
+.uw-root {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    -unity-font-definition: url("../Fonts/Inter-Regular.ttf");
+    font-size: var(--uw-type-16);
+    color: var(--uw-text);
+}
+
+.uw-layer {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.uw-hidden {
+    display: none;
+}
+
+.uw-grow {
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: 0;
+}
+
+/* ------------------------------------------------------------ testi */
+
+.uw-title {
+    -unity-font-definition: url("../Fonts/Inter-SemiBold.ttf");
+    font-size: var(--uw-type-40);
+}
+
+.uw-heading {
+    -unity-font-definition: url("../Fonts/Inter-SemiBold.ttf");
+    font-size: var(--uw-type-20);
+    color: var(--uw-text);
+    white-space: normal;
+}
+
+.uw-body {
+    font-size: var(--uw-type-16);
+    white-space: normal;
+}
+
+.uw-muted {
+    color: var(--uw-text-muted);
+}
+
+.uw-small {
+    font-size: var(--uw-type-14);
+}
+
+.uw-tabular {
+    -unity-font-definition: url("../Fonts/InterTabular-SemiBold.ttf");
+}
+
+.uw-text-shadow {
+    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.65);
+}
+
+/* Le etichette di Unity hanno margini e padding: li tolgo per avere misure precise. */
+.uw-root Label {
+    margin: 0;
+    padding: 0;
+}
+
+/* ------------------------------------------------------------ vetro */
+
+.uw-glass {
+    background-color: var(--uw-glass-fill);
+    border-width: 1px;
+    border-color: var(--uw-glass-border);
+    border-top-color: var(--uw-glass-highlight);
+    border-radius: var(--uw-radius-panel);
+}
+
+.uw-glass--strong {
+    background-color: var(--uw-glass-fill-strong);
+}
+
+.uw-shadow {
+    -unity-background-image-tint-color: rgb(255, 255, 255);
+}
+
+.uw-scrim {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--uw-scrim);
+}
+
+/* ------------------------------------------------------------ pulsanti */
+
+.uw-btn {
+    height: var(--uw-control-height);
+    margin: 0;
+    padding: 0 var(--uw-space-4);
+    border-width: 0;
+    border-radius: var(--uw-radius-control);
+    background-color: var(--uw-surface);
+    color: var(--uw-text);
+    -unity-font-definition: url("../Fonts/Inter-SemiBold.ttf");
+    font-size: var(--uw-type-16);
+    -unity-text-align: middle-center;
+    flex-shrink: 0;
+    transition-property: scale, background-color, color;
+    transition-duration: 0.12s, 0.15s, 0.15s;
+    transition-timing-function: ease-out-cubic;
+}
+
+.uw-btn:hover {
+    background-color: var(--uw-surface-hover);
+}
+
+.uw-btn:active {
+    scale: 0.97 0.97;
+    background-color: var(--uw-surface-press);
+}
+
+.uw-btn:focus {
+    background-color: var(--uw-surface-hover);
+}
+
+.uw-btn--primary {
+    background-color: var(--uw-accent);
+    color: var(--uw-text-on-accent);
+}
+
+.uw-btn--primary:hover,
+.uw-btn--primary:focus {
+    background-color: var(--uw-accent-hover);
+}
+
+.uw-btn--primary:active {
+    background-color: var(--uw-accent-press);
+}
+
+.uw-btn--quiet {
+    background-color: rgba(0, 0, 0, 0);
+    color: var(--uw-text-muted);
+    height: 36px;
+    padding: 0 var(--uw-space-3);
+    -unity-font-definition: url("../Fonts/Inter-Regular.ttf");
+}
+
+.uw-btn--quiet:hover,
+.uw-btn--quiet:focus {
+    background-color: var(--uw-surface);
+    color: var(--uw-text);
+}
+
+.uw-btn--icon {
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0);
+    color: var(--uw-text-muted);
+    border-radius: var(--uw-radius-small);
+}
+
+.uw-btn--icon:hover,
+.uw-btn--icon:focus {
+    background-color: var(--uw-surface-hover);
+    color: var(--uw-text);
+}
+
+/* Pulsante con titolo e descrizione su due righe. */
+.uw-btn--two-line {
+    height: auto;
+    min-height: 62px;
+    padding: var(--uw-space-3) var(--uw-space-4);
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+}
+
+.uw-btn__title {
+    -unity-font-definition: url("../Fonts/Inter-SemiBold.ttf");
+    font-size: var(--uw-type-16);
+    color: var(--uw-text);
+}
+
+.uw-btn__desc {
+    margin-top: 2px;
+    font-size: var(--uw-type-14);
+    color: var(--uw-text-muted);
+    -unity-font-definition: url("../Fonts/Inter-Regular.ttf");
+}
+
+/* ------------------------------------------------------------ campi di testo */
+
+.uw-field {
+    flex-direction: column;
+}
+
+.uw-field__label {
+    font-size: var(--uw-type-14);
+    color: var(--uw-text-muted);
+    margin-bottom: var(--uw-space-2);
+}
+
+.uw-field__hint {
+    font-size: var(--uw-type-14);
+    color: var(--uw-text-faint);
+    margin-top: var(--uw-space-2);
+    white-space: normal;
+}
+
+.uw-field__hint--error,
+.uw-field--invalid .uw-field__hint {
+    color: var(--uw-danger);
+}
+
+.uw-textfield {
+    margin: 0;
+    height: var(--uw-control-height);
+}
+
+.uw-textfield .unity-base-text-field__input {
+    margin: 0;
+    padding: 0 var(--uw-space-4);
+    height: var(--uw-control-height);
+    background-color: var(--uw-field-fill);
+    border-width: 1px;
+    border-color: var(--uw-field-line);
+    border-radius: var(--uw-radius-control);
+    color: var(--uw-text);
+    font-size: var(--uw-type-16);
+    -unity-font-definition: url("../Fonts/Inter-Regular.ttf");
+    -unity-text-align: middle-left;
+    --unity-cursor-color: var(--uw-accent);
+    --unity-selection-color: rgba(242, 165, 62, 0.35);
+    transition-property: border-color, background-color;
+    transition-duration: 0.15s;
+    transition-timing-function: ease-out-cubic;
+}
+
+.uw-textfield .unity-base-text-field__input:hover {
+    border-color: rgba(255, 255, 255, 0.20);
+}
+
+.uw-textfield:focus .unity-base-text-field__input,
+.uw-textfield .unity-base-text-field__input:focus {
+    border-color: var(--uw-accent);
+    background-color: rgba(0, 0, 0, 0.38);
+}
+
+.uw-field--invalid .uw-textfield .unity-base-text-field__input {
+    border-color: var(--uw-danger);
+}
+
+.uw-textfield .unity-text-element {
+    color: var(--uw-text);
+}
+
+.uw-textfield .unity-base-text-field__input--placeholder,
+.uw-textfield .unity-base-text-field__input--placeholder .unity-text-element {
+    color: var(--uw-text-faint);
+}
+
+/* ------------------------------------------------------------ icone */
+
+.uw-icon {
+    color: var(--uw-text);
+}
+
+.uw-icon--danger {
+    color: var(--uw-danger);
+}
+
+.uw-icon--info {
+    color: var(--uw-info);
+}
+
+/* ------------------------------------------------------------ stato: spinner, passi, barra */
+
+.uw-status__head {
+    flex-direction: row;
+    align-items: center;
+}
+
+.uw-status__head > .uw-icon {
+    margin-right: var(--uw-space-3);
+}
+
+.uw-status__spinner {
+    color: var(--uw-accent);
+}
+
+.uw-status__text {
+    margin-top: var(--uw-space-3);
+    min-height: 22px;
+}
+
+.uw-steps {
+    flex-direction: row;
+    margin-top: var(--uw-space-5);
+}
+
+.uw-step {
+    flex-direction: row;
+    align-items: center;
+    margin-right: var(--uw-space-5);
+}
+
+.uw-step__dot {
+    color: var(--uw-text-faint);
+    margin-right: var(--uw-space-2);
+}
+
+.uw-step__label {
+    font-size: var(--uw-type-14);
+    color: var(--uw-text-faint);
+}
+
+.uw-step--current .uw-step__dot {
+    color: var(--uw-accent);
+}
+
+.uw-step--current .uw-step__label {
+    color: var(--uw-text);
+}
+
+.uw-step--done .uw-step__dot {
+    color: var(--uw-success);
+    width: 12px;
+    height: 12px;
+}
+
+.uw-step--done .uw-step__label {
+    color: var(--uw-text-muted);
+}
+
+.uw-progress {
+    height: 3px;
+    margin-top: var(--uw-space-4);
+    border-radius: 2px;
+    background-color: rgba(255, 255, 255, 0.08);
+    overflow: hidden;
+}
+
+.uw-progress__fill {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 30%;
+    border-radius: 2px;
+    background-color: var(--uw-accent);
+}
+
+/* ------------------------------------------------------------ tasto (E, Esc) */
+
+.uw-keycap {
+    min-width: 34px;
+    height: 34px;
+    padding: 0 var(--uw-space-2);
+    border-radius: var(--uw-radius-small);
+    background-color: rgba(245, 246, 248, 0.94);
+    align-items: center;
+    justify-content: center;
+    border-bottom-width: 2px;
+    border-bottom-color: rgba(0, 0, 0, 0.35);
+}
+
+.uw-keycap__label {
+    -unity-font-definition: url("../Fonts/Inter-SemiBold.ttf");
+    font-size: var(--uw-type-16);
+    color: rgb(18, 20, 26);
+    -unity-text-align: middle-center;
+}
+
+.uw-keycap--small {
+    min-width: 28px;
+    height: 24px;
+    padding: 0 6px;
+    border-radius: 5px;
+    background-color: rgba(255, 255, 255, 0.12);
+    border-bottom-color: rgba(0, 0, 0, 0.25);
+}
+
+.uw-keycap--small .uw-keycap__label {
+    font-size: 12px;
+    color: var(--uw-text-muted);
+}
+
+/* ------------------------------------------------------------ finestre */
+
+.uw-window {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    align-items: center;
+    justify-content: center;
+}
+
+.uw-window__panel {
+    max-height: 80%;
+    background-color: var(--uw-glass-fill-strong);
+    padding-bottom: var(--uw-space-2);
+}
+
+.uw-window__header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--uw-space-4) var(--uw-space-4) var(--uw-space-2) var(--uw-space-5);
+}
+
+.uw-window__title {
+    -unity-font-definition: url("../Fonts/Inter-SemiBold.ttf");
+    font-size: var(--uw-type-20);
+}
+
+.uw-window__scroll {
+    flex-shrink: 1;
+}
+
+.uw-window__content {
+    padding: var(--uw-space-2) var(--uw-space-5) var(--uw-space-4) var(--uw-space-5);
+}
+
+.uw-window__footer {
+    flex-direction: row;
+    justify-content: flex-end;
+    padding: var(--uw-space-2) var(--uw-space-5) var(--uw-space-4) var(--uw-space-5);
+}
+
+.uw-window__footer > .uw-btn {
+    margin-left: var(--uw-space-2);
+    min-width: 120px;
+}
+
+/* Barre di scorrimento sottili e quiete. */
+.uw-window__scroll .unity-scroller--vertical {
+    width: 6px;
+    border-width: 0;
+    background-color: rgba(0, 0, 0, 0);
+}
+
+.uw-window__scroll .unity-scroller--vertical .unity-base-slider__dragger {
+    border-width: 0;
+    border-radius: 3px;
+    background-color: rgba(255, 255, 255, 0.18);
+}
+
+.uw-window__scroll .unity-scroller--vertical .unity-repeat-button {
+    display: none;
+}
+
+.uw-window__scroll .unity-scroller--vertical .unity-base-slider__tracker {
+    border-width: 0;
+    background-color: rgba(0, 0, 0, 0);
+}
+
+/* Crediti */
+.uw-credits__row {
+    flex-direction: row;
+    padding: var(--uw-space-2) 0;
+}
+
+.uw-credits__role {
+    width: 130px;
+    flex-shrink: 0;
+    font-size: var(--uw-type-14);
+    color: var(--uw-text-muted);
+    padding-top: 1px;
+}
+
+.uw-credits__who {
+    flex-grow: 1;
+    flex-shrink: 1;
+    white-space: normal;
+}
+
+.uw-credits__thanks {
+    margin-top: var(--uw-space-4);
+}

@@ -62,14 +62,13 @@ namespace Underworld.UI
             if (!_views.TryGetValue(id, out var card)) return;
             _views.Remove(id);
             float t = fast ? 0.12f : UiAnim.ExitTime(0.2f);
-            UiAnim.Out(card, t, new Vector2(10f, 0f), 1f, true, () =>
+            UiAnim.Out(card, t, new Vector2(10f, 0f), 1f, false, () =>
             {
                 // Chiude lo spazio in modo morbido, poi toglie l'elemento.
                 float h = card.resolvedStyle.height;
                 float mb = card.resolvedStyle.marginBottom;
                 float pt = card.resolvedStyle.paddingTop;
                 float pb = card.resolvedStyle.paddingBottom;
-                card.style.display = DisplayStyle.Flex;
                 card.style.visibility = Visibility.Hidden;
                 if (float.IsNaN(h) || h <= 0f) { card.RemoveFromHierarchy(); return; }
                 UiAnim.Value(card, 0.14f, Ease.OutCubic, k =>

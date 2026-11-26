@@ -71,6 +71,7 @@ namespace Underworld.UI
             // Titolo gigante. Nessuna etichetta sopra, nessun punto finale.
             _titleBlock = UiBuild.Box("uw-menu__title-block", PickingMode.Ignore);
             _titleBlock.Add(UiBuild.Text("UNDERWORLD", "uw-menu__title"));
+            _titleBlock.Add(UiBuild.Text("La città non dorme mai", "uw-menu__tagline"));
             Root.Add(_titleBlock);
 
             _panel = UiBuild.Glass("uw-menu__panel");

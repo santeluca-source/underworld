@@ -19,7 +19,7 @@ Shader "Underworld/UI/SkylineSky"
         {
             Name "SkylineSky"
             Tags { "LightMode" = "UniversalForward" }
-            Cull Front
+            Cull Off
             ZWrite Off
             ZTest LEqual
 
