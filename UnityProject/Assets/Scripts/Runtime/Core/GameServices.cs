@@ -7,7 +7,7 @@ namespace Underworld.Core
 
     /// <summary>
     /// Avvio e connessione. Il menu (UI) chiama questi metodi; la parte di rete li implementa.
-    /// Tutti i testi di stato sono in italiano, pronti da mostrare.
+    /// Tutti i testi di stato sono in inglese, pronti da mostrare al giocatore.
     /// </summary>
     public interface IGameLauncher
     {

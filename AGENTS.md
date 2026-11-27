@@ -6,7 +6,7 @@ Il gioco lo sviluppa Claude con agenti. Il contratto tecnico è `Docs/ARCHITECTU
 1. Analizza il repository prima di modificare file. Non sovrascrivere codice senza averlo letto.
 2. Piccoli incrementi. Un sistema complesso alla volta per ogni agente.
 3. Client, server e backend separati. Il client non decide mai denaro, oggetti o proprietà.
-4. Codice leggibile e commentato (commenti in italiano, nomi in inglese).
+4. Codice leggibile e commentato (commenti in italiano, nomi in inglese). **Tutti i testi del gioco per il giocatore sono in inglese** (richiesta dell'utente, 2026-11-27).
 5. Dopo ogni modifica: compila, esegui i test, prova la build. Non dichiarare funzionante ciò che non hai provato.
 6. Niente dipendenze inutili. Ogni scelta di architettura va in `Docs/DECISIONS.md`.
 7. Segnala problemi e decisioni. Aggiorna la documentazione quando cambia l'architettura.

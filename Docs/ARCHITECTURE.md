@@ -62,7 +62,7 @@ UNDERWORLD.exe -connect 127.0.0.1:7777 -name Bot1 -profile C:\tmp\bot1 -bot wand
   ```json
   { "v": 1, "playerId": "guid", "token": "base64", "name": "Nome", "ticket": null }
   ```
-  Il server rifiuta con un motivo in italiano (versione diversa, server pieno, nome non valido, già collegato...). Il client mostra il motivo.
+  Il server rifiuta con un motivo in inglese, da mostrare al giocatore (versione diversa, server pieno, nome non valido, già collegato...). Il client mostra il motivo.
 - **Prefab del giocatore** `Player`: `NetworkObject`, `NetworkTransform` con `AuthorityMode = Owner`, `ThirdPersonController` attivo solo per il proprietario, `PlayerVisual`, `PlayerNetwork`. Lo crea il server sullo spawn dell'area.
 - **Movimento**: il proprietario muove il suo personaggio (risposta immediata). Il server lo controlla con `MovementValidator`: velocità massima (a piedi 8,5 m/s; in auto quella del veicolo + margine) e salti di posizione. Se un controllo fallisce, il server rimette il giocatore nell'ultima posizione valida.
 - **RPC** (client → server): `[Rpc(SendTo.Server)]`, nome del metodo che finisce con `Rpc`.
@@ -120,7 +120,7 @@ UNDERWORLD.exe -connect 127.0.0.1:7777 -name Bot1 -profile C:\tmp\bot1 -bot wand
 
 ## 10. Interfaccia (UI)
 
-- **UI Toolkit** a runtime (`UIDocument` + `PanelSettings` + fogli USS). Testi in italiano.
+- **UI Toolkit** a runtime (`UIDocument` + `PanelSettings` + fogli USS). **Testi del gioco in inglese** (menu, HUD, finestre, cartelli, messaggi). Soldi nel formato inglese: `$12,500`.
 - Stile "vetro" (preferenza dell'utente, regole del vault): pannelli scuri semitrasparenti, bordo 1 px bianco al 15–20 %, angoli arrotondati, ombra morbida, massimo 1–2 livelli di vetro per schermata, contrasto del testo almeno 4,5:1. Il blur dietro il vetro non c'è in UI Toolkit: si usa il fondo più scuro (regola di ripiego).
 - Regole del vault da rispettare: niente gradienti di sfondo, niente sottotitoli tutto maiuscolo, niente punto finale nei titoli, poche pillole e pochi bordi; entrate ease-out 150–250 ms, uscite più corte del 20 %, pulsanti a scala 0,97 quando premuti, niente rimbalzi.
 - La logica non chiama la UI: scrive su `HudBus` (soldi, suggerimento, avvisi, stelle ricercato, obiettivo, area).
@@ -130,7 +130,7 @@ UNDERWORLD.exe -connect 127.0.0.1:7777 -name Bot1 -profile C:\tmp\bot1 -bot wand
 
 - Assembly: `Underworld.Runtime` (Assets/Scripts/Runtime), `Underworld.Editor` (Assets/Scripts/Editor), `Underworld.Tests.EditMode` (Assets/Tests/EditMode).
 - Namespace = cartella: `Underworld.Core`, `.Net`, `.Player`, `.World`, `.UI`, `.Server`, `.Economy`, `.Testing`, poi `.Vehicles`, `.Properties`, `.Missions`, `.Police`, `.Social`, `.Areas`.
-- Nomi del codice in inglese. Commenti e testi per il giocatore in italiano.
+- Nomi del codice in inglese. Commenti e documenti in italiano. **Testi per il giocatore in inglese** (UI, cartelli nel mondo, motivi di rifiuto, avvisi).
 - Codice solo server: dentro `if (IsServer)` o in classi del namespace `Underworld.Server`. Ogni metodo che cambia lo stato controlla di girare sul server.
 - Niente `Find` o LINQ nei cicli di ogni frame. Niente stato statico che non si azzera (usa `RuntimeInitializeOnLoadMethod`).
 - Numeri casuali del mondo: `System.Random(seme)`. Numeri casuali di gioco: solo sul server.

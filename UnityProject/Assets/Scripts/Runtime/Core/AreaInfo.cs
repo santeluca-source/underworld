@@ -11,7 +11,7 @@ namespace Underworld.Core
         TestGround = 9,
     }
 
-    /// <summary>Dati fissi delle aree: scena, porta standard, nome in italiano.</summary>
+    /// <summary>Dati fissi delle aree: scena, porta standard, nome da mostrare (in inglese).</summary>
     public static class AreaInfo
     {
         public static string SceneName(AreaId area) => "Area_" + area;
@@ -28,10 +28,10 @@ namespace Underworld.Core
         public static string DisplayName(AreaId area) => area switch
         {
             AreaId.Downtown => "Downtown",
-            AreaId.Industrial => "Distretto industriale",
-            AreaId.Suburbs => "Periferia residenziale",
-            AreaId.Outskirts => "Campagna",
-            _ => "Area di test",
+            AreaId.Industrial => "Industrial District",
+            AreaId.Suburbs => "Suburbs",
+            AreaId.Outskirts => "Outskirts",
+            _ => "Test Ground",
         };
 
         /// <summary>Le aree giocabili (senza TestGround).</summary>

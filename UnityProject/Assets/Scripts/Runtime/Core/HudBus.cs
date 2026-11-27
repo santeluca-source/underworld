@@ -17,7 +17,7 @@ namespace Underworld.Core
         public static event Action<long> CashChanged;
         public static event Action<int> WantedChanged;              // 0..5 stelle
         public static event Action<string> ObjectiveChanged;        // null = nascondi
-        public static event Action<string> AreaChanged;             // nome dell'area in italiano
+        public static event Action<string> AreaChanged;             // nome dell'area da mostrare (in inglese)
 
         public static string Prompt { get; private set; }
         public static long Cash { get; private set; }

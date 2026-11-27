@@ -45,6 +45,10 @@ Ogni voce: decisione, motivo, alternative. Le decisioni aperte del brief restano
 ### D11 — Arte: kit Kenney (CC0) dal vault + forme fatte a codice
 - Car Kit, Factory Kit, Nature Kit, già scaricati dall'utente. Licenza CC0. Crediti a Kenney nel gioco.
 
+### D12 — Lingua del gioco: inglese
+- Richiesta dell'utente (2026-11-27): tutti i testi per il giocatore sono in inglese (menu, HUD, finestre, cartelli nel mondo, motivi di rifiuto, avvisi, nomi delle aree).
+- Documenti e commenti del codice restano in italiano (li legge l'utente). Formato dei soldi: `$12,500`.
+
 ## Decisioni ancora aperte (dal brief)
 - Hosting dei server, matchmaking, provider voice definitivo, autenticazione definitiva.
 - Dimensioni delle mappe (ora: circa 300 × 300 m per area).
