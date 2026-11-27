@@ -28,6 +28,23 @@ namespace Underworld.World
         public BuildResult Result { get; private set; }
         public bool IsBuilt => Result != null;
 
+        /// <summary>
+        /// Chiama <paramref name="callback"/> quando il mondo è pronto: subito se è già costruito,
+        /// altrimenti al prossimo <see cref="WorldBuilt"/> (una volta sola). Utile ai moduli che si
+        /// avviano dopo la scena e vogliono attaccare oggetti ai punti speciali.
+        /// </summary>
+        public static void WhenBuilt(Action<AreaBuilder> callback)
+        {
+            if (callback == null) return;
+            if (Current != null && Current.IsBuilt) { callback(Current); return; }
+            void Once(AreaBuilder b)
+            {
+                WorldBuilt -= Once;
+                callback(b);
+            }
+            WorldBuilt += Once;
+        }
+
         void Awake()
         {
             Current = this;

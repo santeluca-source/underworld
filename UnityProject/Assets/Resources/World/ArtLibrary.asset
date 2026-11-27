@@ -1,0 +1,459 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3b9a2480fab149648befa7de7fd5ba7b, type: 3}
+  m_Name: ArtLibrary
+  m_EditorClassIdentifier: Underworld.Runtime::Underworld.World.ArtLibrary
+  paletteMatte: {fileID: 2100000, guid: 6586823861a4fec428c8d4459533dcd6, type: 2}
+  paletteGloss: {fileID: 2100000, guid: 34c1af402a1a8e24780cad67ba6ae3a8, type: 2}
+  paletteGlow: {fileID: 2100000, guid: d161a3a55b974b84fbf6c39b9587a4d1, type: 2}
+  paletteClear: {fileID: 2100000, guid: 6907add07713a2f419d09bc19ae31145, type: 2}
+  carKit: {fileID: 2100000, guid: a7d7a19742b5b9a4996f7111bf722b26, type: 2}
+  factoryKit: {fileID: 2100000, guid: 663176e7cc8ceee4f8ab16cf0c26b6eb, type: 2}
+  models:
+  - id: car.sedan
+    prefab: {fileID: 919132149155446097, guid: 7f34b4669eed27a4b94bba4a0ade664a, type: 3}
+    kit: 1
+    bounds:
+      m_Center: {x: 0, y: 0.65, z: -0.024999976}
+      m_Extent: {x: 0.75, y: 0.65, z: 1.275}
+    scale: 1.6862746
+    collider: 1
+    bodyPair: 14
+  - id: car.sedan_sports
+    prefab: {fileID: 919132149155446097, guid: 896eeeff605a2db4dbab0357167d2195, type: 3}
+    kit: 1
+    bounds:
+      m_Center: {x: 0, y: 0.54999995, z: -0.024999976}
+      m_Extent: {x: 0.65, y: 0.54999995, z: 1.275}
+    scale: 1.7254902
+    collider: 1
+    bodyPair: 14
+  - id: car.hatchback
+    prefab: {fileID: 919132149155446097, guid: 60a4206b6a5a46e4f9b477d6ced57485, type: 3}
+    kit: 1
+    bounds:
+      m_Center: {x: 0, y: 0.5500001, z: -0.024999976}
+      m_Extent: {x: 0.65, y: 0.5500001, z: 1.425}
+    scale: 1.4035088
+    collider: 1
+    bodyPair: 11
+  - id: car.suv
+    prefab: {fileID: 919132149155446097, guid: 47e6bb203f0d2474ab46e3f3a0eda80d, type: 3}
+    kit: 1
+    bounds:
+      m_Center: {x: 0, y: 0.65, z: 0}
+      m_Extent: {x: 0.75, y: 0.65, z: 1.3499999}
+    scale: 1.7037038
+    collider: 1
+    bodyPair: 11
+  - id: car.suv_luxury
+    prefab: {fileID: 919132149155446097, guid: a620854e6535c524d9eee5a61e1a87b5, type: 3}
+    kit: 1
+    bounds:
+      m_Center: {x: 0, y: 0.65, z: 0.024999976}
+      m_Extent: {x: 0.75, y: 0.65, z: 1.425}
+    scale: 1.6842107
+    collider: 1
+    bodyPair: 12
+  - id: car.van
+    prefab: {fileID: 919132149155446097, guid: 6d4b2455999a0294fbeb041cc6aafde8, type: 3}
+    kit: 1
+    bounds:
+      m_Center: {x: 0, y: 0.67499995, z: -0.024999976}
+      m_Extent: {x: 0.75, y: 0.67499995, z: 1.3750001}
+    scale: 1.781818
+    collider: 1
+    bodyPair: 15
+  - id: car.taxi
+    prefab: {fileID: 919132149155446097, guid: f055fef4264ff824989ff9349830d050, type: 3}
+    kit: 1
+    bounds:
+      m_Center: {x: 0, y: 0.7499999, z: -0.024999976}
+      m_Extent: {x: 0.75, y: 0.7499999, z: 1.3749998}
+    scale: 1.6000003
+    collider: 1
+    bodyPair: -1
+  - id: car.police
+    prefab: {fileID: 919132149155446097, guid: d2e2ef5a6ca78db448b5a48e5efea325, type: 3}
+    kit: 1
+    bounds:
+      m_Center: {x: 0, y: 0.65, z: -0.00000023841858}
+      m_Extent: {x: 0.75, y: 0.65, z: 1.5499997}
+    scale: 1.4838712
+    collider: 1
+    bodyPair: -1
+  - id: car.ambulance
+    prefab: {fileID: 919132149155446097, guid: bcf844b0a50a2094e8866987609c0591, type: 3}
+    kit: 1
+    bounds:
+      m_Center: {x: 0, y: 0.9000001, z: -0.024999976}
+      m_Extent: {x: 0.75, y: 0.9000001, z: 1.6249998}
+    scale: 1.7846158
+    collider: 1
+    bodyPair: -1
+  - id: car.firetruck
+    prefab: {fileID: 919132149155446097, guid: feac28c287a4b3e4986e2dbdf436bb34, type: 3}
+    kit: 1
+    bounds:
+      m_Center: {x: 0, y: 0.85, z: -0.00000035762787}
+      m_Extent: {x: 0.75, y: 0.85, z: 1.6999998}
+    scale: 2.3529415
+    collider: 1
+    bodyPair: -1
+  - id: car.delivery
+    prefab: {fileID: 919132149155446097, guid: 13ce6083a3f048746b941fec85dfd7b9, type: 3}
+    kit: 1
+    bounds:
+      m_Center: {x: 0, y: 0.8249999, z: -0.024999976}
+      m_Extent: {x: 0.75, y: 0.8249999, z: 1.6249998}
+    scale: 1.7230772
+    collider: 1
+    bodyPair: -1
+  - id: car.delivery_flat
+    prefab: {fileID: 919132149155446097, guid: c0ed88d2229f1154d98f19e6f07eefb0, type: 3}
+    kit: 1
+    bounds:
+      m_Center: {x: 0, y: 0.67499995, z: -0.024999976}
+      m_Extent: {x: 0.75, y: 0.67499995, z: 1.6249998}
+    scale: 1.7230772
+    collider: 1
+    bodyPair: -1
+  - id: car.truck
+    prefab: {fileID: 919132149155446097, guid: 6873c3499ff96724182febd03e346e87, type: 3}
+    kit: 1
+    bounds:
+      m_Center: {x: 0, y: 0.65, z: -0.024999976}
+      m_Extent: {x: 0.75, y: 0.65, z: 1.4749998}
+    scale: 2.3050852
+    collider: 1
+    bodyPair: -1
+  - id: car.truck_flat
+    prefab: {fileID: 919132149155446097, guid: 1f5609acf9b53cb439d9e2d835ab601e, type: 3}
+    kit: 1
+    bounds:
+      m_Center: {x: 0, y: 0.65, z: 0}
+      m_Extent: {x: 0.75, y: 0.65, z: 1.3725572}
+    scale: 2.4771283
+    collider: 1
+    bodyPair: -1
+  - id: car.garbage_truck
+    prefab: {fileID: 919132149155446097, guid: 8db4686da33769543956ac5df4089649, type: 3}
+    kit: 1
+    bounds:
+      m_Center: {x: 0, y: 0.79999995, z: 0.024999976}
+      m_Extent: {x: 0.79999995, y: 0.79999995, z: 1.7249998}
+    scale: 2.2028987
+    collider: 1
+    bodyPair: -1
+  - id: prop.cone
+    prefab: {fileID: 919132149155446097, guid: dbcced94f8253fd42b258f8a9d12fc6b, type: 3}
+    kit: 1
+    bounds:
+      m_Center: {x: 0, y: 0.29762155, z: 0}
+      m_Extent: {x: 0.23809722, y: 0.29762155, z: 0.23809722}
+    scale: 1.1759901
+    collider: 1
+    bodyPair: -1
+  - id: prop.cone_flat
+    prefab: {fileID: 919132149155446097, guid: 38ea25419f9de8e4e8168f9fa015a3c1, type: 3}
+    kit: 1
+    bounds:
+      m_Center: {x: 0, y: 0.14047737, z: 0}
+      m_Extent: {x: 0.23809722, y: 0.14047737, z: 0.23809722}
+    scale: 1.1549904
+    collider: 1
+    bodyPair: -1
+  - id: prop.box
+    prefab: {fileID: 919132149155446097, guid: b195dfdcf7359da429743ac17b52bec9, type: 3}
+    kit: 1
+    bounds:
+      m_Center: {x: 0, y: 0.3575, z: 0}
+      m_Extent: {x: 0.3575, y: 0.3575, z: 0.3575}
+    scale: 0.76923084
+    collider: 1
+    bodyPair: -1
+  - id: prop.tire
+    prefab: {fileID: 919132149155446097, guid: a757e06984b434c409cca88307e41e6e, type: 3}
+    kit: 1
+    bounds:
+      m_Center: {x: 0, y: 0.000000029802322, z: 0}
+      m_Extent: {x: 0.175, y: 0.30000004, z: 0.3}
+    scale: 1.1666666
+    collider: 1
+    bodyPair: -1
+  - id: prop.crate_small
+    prefab: {fileID: 919132149155446097, guid: 537705f815cd23549b6f4f3488231ee7, type: 3}
+    kit: 2
+    bounds:
+      m_Center: {x: 0.000000029802322, y: 0.275, z: 0}
+      m_Extent: {x: 0.2975, y: 0.275, z: 0.25}
+    scale: 1
+    collider: 1
+    bodyPair: -1
+  - id: prop.crate_large
+    prefab: {fileID: 919132149155446097, guid: 02a895d13805f354cab0ebf676af6461, type: 3}
+    kit: 2
+    bounds:
+      m_Center: {x: 0, y: 0.275, z: 0}
+      m_Extent: {x: 0.55, y: 0.275, z: 0.5}
+    scale: 1.8181818
+    collider: 1
+    bodyPair: -1
+  - id: prop.crate_long
+    prefab: {fileID: 919132149155446097, guid: daaefb4973ec5cd4ab238b3db5a7dfae, type: 3}
+    kit: 2
+    bounds:
+      m_Center: {x: 0, y: 0.275, z: 0}
+      m_Extent: {x: 0.55, y: 0.275, z: 0.25}
+    scale: 1.4545455
+    collider: 1
+    bodyPair: -1
+  - id: prop.crate_wide
+    prefab: {fileID: 919132149155446097, guid: 5238328f8f87a1947aba60930c67dbca, type: 3}
+    kit: 2
+    bounds:
+      m_Center: {x: 0.000000029802322, y: 0.275, z: 0}
+      m_Extent: {x: 0.2975, y: 0.275, z: 0.5}
+    scale: 1.4
+    collider: 1
+    bodyPair: -1
+  - id: prop.warning_post
+    prefab: {fileID: 919132149155446097, guid: 1178d582fcccb954e9d07178f3a84b1b, type: 3}
+    kit: 2
+    bounds:
+      m_Center: {x: 0, y: 0.77555764, z: 0}
+      m_Extent: {x: 0.19999999, y: 0.77555764, z: 0.19999999}
+    scale: 0.77363694
+    collider: 1
+    bodyPair: -1
+  - id: prop.warning_sign
+    prefab: {fileID: 919132149155446097, guid: 6a1463b351ab98c41b3fc3334c64cbe0, type: 3}
+    kit: 2
+    bounds:
+      m_Center: {x: 0, y: 0.64517874, z: 0}
+      m_Extent: {x: 0.19999999, y: 0.64517874, z: 0.19999999}
+    scale: 1.0074728
+    collider: 1
+    bodyPair: -1
+  - id: nature.tree_oak
+    prefab: {fileID: 919132149155446097, guid: 133b09157d8931a4593d556fff2009d0, type: 3}
+    kit: 3
+    bounds:
+      m_Center: {x: -0.000000029802322, y: 0.56311995, z: 0}
+      m_Extent: {x: 0.32027704, y: 0.61311996, z: 0.369824}
+    scale: 5.7085075
+    collider: 2
+    bodyPair: -1
+  - id: nature.tree_oak_dark
+    prefab: {fileID: 919132149155446097, guid: 1b86d1f5895831e4596a2a8acb3c4fc1, type: 3}
+    kit: 3
+    bounds:
+      m_Center: {x: -0.000000029802322, y: 0.56311995, z: 0}
+      m_Extent: {x: 0.32027704, y: 0.61311996, z: 0.369824}
+    scale: 5.7085075
+    collider: 2
+    bodyPair: -1
+  - id: nature.tree_default
+    prefab: {fileID: 919132149155446097, guid: 1818acdc3641d6c46a29803f001bc2bb, type: 3}
+    kit: 3
+    bounds:
+      m_Center: {x: 0, y: 0.8039435, z: 0}
+      m_Extent: {x: 0.3775, y: 0.85394347, z: 0.32692447}
+    scale: 4.3913913
+    collider: 2
+    bodyPair: -1
+  - id: nature.tree_default_dark
+    prefab: {fileID: 919132149155446097, guid: 73412495eb5a84f41ad180b6d620faa0, type: 3}
+    kit: 3
+    bounds:
+      m_Center: {x: 0, y: 0.8039435, z: 0}
+      m_Extent: {x: 0.3775, y: 0.85394347, z: 0.32692447}
+    scale: 4.3913913
+    collider: 2
+    bodyPair: -1
+  - id: nature.tree_detailed
+    prefab: {fileID: 919132149155446097, guid: a9c4a16cf90804c428582aaac999c6fd, type: 3}
+    kit: 3
+    bounds:
+      m_Center: {x: -0.00892508, y: 0.6162084, z: -0.008665264}
+      m_Extent: {x: 0.42355746, y: 0.6662084, z: 0.3808012}
+    scale: 5.2536116
+    collider: 2
+    bodyPair: -1
+  - id: nature.tree_fat
+    prefab: {fileID: 919132149155446097, guid: eb4b8cde96ab8624eaf771123eead82e, type: 3}
+    kit: 3
+    bounds:
+      m_Center: {x: 0, y: 0.5251934, z: 0}
+      m_Extent: {x: 0.3775, y: 0.5751934, z: 0.32692447}
+    scale: 5.6502733
+    collider: 2
+    bodyPair: -1
+  - id: nature.tree_small
+    prefab: {fileID: 919132149155446097, guid: 11e06802433ef3642920d9efe318b759, type: 3}
+    kit: 3
+    bounds:
+      m_Center: {x: 0, y: 0.50501853, z: 0}
+      m_Extent: {x: 0.17731869, y: 0.55501854, z: 0.20474997}
+    scale: 4.053919
+    collider: 2
+    bodyPair: -1
+  - id: nature.tree_tall
+    prefab: {fileID: 919132149155446097, guid: e490188ed966e1040bf89745dd7c166d, type: 3}
+    kit: 3
+    bounds:
+      m_Center: {x: 0, y: 0.7938594, z: 0}
+      m_Extent: {x: 0.19979158, y: 0.84385943, z: 0.23069948}
+    scale: 5.3326416
+    collider: 2
+    bodyPair: -1
+  - id: nature.tree_cone
+    prefab: {fileID: 919132149155446097, guid: b998e5e3c5e7c0c439e708478ae9af53, type: 3}
+    kit: 3
+    bounds:
+      m_Center: {x: 0, y: 0.66516644, z: 0}
+      m_Extent: {x: 0.26483178, y: 0.71516645, z: 0.26483178}
+    scale: 4.5443964
+    collider: 2
+    bodyPair: -1
+  - id: nature.tree_plateau
+    prefab: {fileID: 919132149155446097, guid: 486c8280df9ada4459b83e70a45ba4ca, type: 3}
+    kit: 3
+    bounds:
+      m_Center: {x: -0.022289664, y: 0.5746699, z: -0.001975}
+      m_Extent: {x: 0.30586973, y: 0.6246699, z: 0.32744998}
+    scale: 4.8025365
+    collider: 2
+    bodyPair: -1
+  - id: nature.tree_oak_fall
+    prefab: {fileID: 919132149155446097, guid: 6fa3a65393be0824d8e5272ea02db31d, type: 3}
+    kit: 3
+    bounds:
+      m_Center: {x: -0.000000029802322, y: 0.56311995, z: 0}
+      m_Extent: {x: 0.32027704, y: 0.61311996, z: 0.369824}
+    scale: 5.7085075
+    collider: 2
+    bodyPair: -1
+  - id: nature.bush
+    prefab: {fileID: 919132149155446097, guid: 1e74a7391c238f8438c82ad837651ac1, type: 3}
+    kit: 3
+    bounds:
+      m_Center: {x: 0, y: 0.0722218, z: 0}
+      m_Extent: {x: 0.19799998, y: 0.1222218, z: 0.19799998}
+    scale: 3.2727387
+    collider: 0
+    bodyPair: -1
+  - id: nature.bush_large
+    prefab: {fileID: 919132149155446097, guid: 361e94bdbf4ec6e47977e6bcc0402796, type: 3}
+    kit: 3
+    bounds:
+      m_Center: {x: 0, y: 0.0714665, z: 0}
+      m_Extent: {x: 0.18715498, y: 0.121466495, z: 0.1678439}
+    scale: 4.939634
+    collider: 0
+    bodyPair: -1
+  - id: nature.bush_detailed
+    prefab: {fileID: 919132149155446097, guid: e5456f03679e71549a758b57053dfc7f, type: 3}
+    kit: 3
+    bounds:
+      m_Center: {x: 0, y: 0.13020544, z: 0}
+      m_Extent: {x: 0.3012719, y: 0.18020543, z: 0.3012719}
+    scale: 2.774611
+    collider: 0
+    bodyPair: -1
+  - id: nature.flower_red
+    prefab: {fileID: 919132149155446097, guid: 2dbfaa3e103c448459b9d7b0657c769e, type: 3}
+    kit: 3
+    bounds:
+      m_Center: {x: -0.024985738, y: 0.09625, z: 0}
+      m_Extent: {x: 0.079548754, y: 0.14625, z: 0.090529524}
+    scale: 1.5384616
+    collider: 0
+    bodyPair: -1
+  - id: nature.flower_yellow
+    prefab: {fileID: 919132149155446097, guid: 6bf52669f2c5bee49b73bdba4fd6dacb, type: 3}
+    kit: 3
+    bounds:
+      m_Center: {x: -0.024985738, y: 0.046249993, z: 0}
+      m_Extent: {x: 0.079548754, y: 0.09624999, z: 0.090529524}
+    scale: 2.3376625
+    collider: 0
+    bodyPair: -1
+  - id: nature.flower_purple
+    prefab: {fileID: 919132149155446097, guid: 3bb1a106bd0f6f34995310fb66a17e6b, type: 3}
+    kit: 3
+    bounds:
+      m_Center: {x: -0.024985738, y: 0.07124999, z: 0}
+      m_Extent: {x: 0.079548754, y: 0.12124999, z: 0.090529524}
+    scale: 1.8556702
+    collider: 0
+    bodyPair: -1
+  - id: nature.grass
+    prefab: {fileID: 919132149155446097, guid: 07e2a599930fae14481da1e3bd5ae2bd, type: 3}
+    kit: 3
+    bounds:
+      m_Center: {x: -0.008299604, y: 0.07699999, z: 0.043247387}
+      m_Extent: {x: 0.19053699, y: 0.12699999, z: 0.19609138}
+    scale: 1.3779528
+    collider: 0
+    bodyPair: -1
+  - id: nature.rock_small
+    prefab: {fileID: 919132149155446097, guid: 579e92e26124fc744b477ded1fb825f2, type: 3}
+    kit: 3
+    bounds:
+      m_Center: {x: 0, y: 0.045612, z: 0}
+      m_Extent: {x: 0.18039998, y: 0.095612, z: 0.18039998}
+    scale: 1.6629714
+    collider: 0
+    bodyPair: -1
+  - id: nature.pot_large
+    prefab: {fileID: 919132149155446097, guid: dd9b2213ae77b3c4da4159da00c7bef2, type: 3}
+    kit: 3
+    bounds:
+      m_Center: {x: 0, y: 0.049999997, z: 0}
+      m_Extent: {x: 0.28179818, y: 0.099999994, z: 0.24404438}
+    scale: 4.5
+    collider: 1
+    bodyPair: -1
+  - id: nature.pot_small
+    prefab: {fileID: 919132149155446097, guid: 9097dd278c152234ab4954248ed6afa3, type: 3}
+    kit: 3
+    bounds:
+      m_Center: {x: 0, y: 0.08399999, z: 0.000000014901161}
+      m_Extent: {x: 0.16172479, y: 0.13399999, z: 0.1400578}
+    scale: 2.2388062
+    collider: 1
+    bodyPair: -1
+  - id: nature.statue_obelisk
+    prefab: {fileID: 919132149155446097, guid: 7f2f1e5cafa013741accb0c4e2131ad2, type: 3}
+    kit: 3
+    bounds:
+      m_Center: {x: 0, y: 0.38769853, z: 0}
+      m_Extent: {x: 0.15350929, y: 0.43769854, z: 0.15350929}
+    scale: 4.569355
+    collider: 1
+    bodyPair: -1
+  flatColors:
+  - {r: 0.16078427, g: 0.7882353, b: 0.67058825, a: 1}
+  - {r: 0.8862745, g: 0.5137254, b: 0.34117648, a: 1}
+  - {r: 0.16862747, g: 0.6509804, b: 0.6666667, a: 1}
+  - {r: 0.8, g: 0.462745, b: 0.36862746, a: 1}
+  - {r: 1, g: 1, b: 1, a: 1}
+  - {r: 1, g: 0.572549, b: 0.25490198, a: 1}
+  - {r: 1, g: 0.9490196, b: 0.8705882, a: 1}
+  - {r: 0.17254895, g: 0.8470588, b: 0.7215686, a: 1}
+  - {r: 0.8784314, g: 0.29019606, b: 0.31372547, a: 1}
+  - {r: 0.9960783, g: 0.6941177, b: 0.27843136, a: 1}
+  - {r: 0.62352943, g: 0.5372549, b: 1, a: 1}
+  - {r: 1, g: 0.5568628, b: 0.38431367, a: 1}
+  - {r: 0.6039216, g: 0.7098039, b: 0.7294118, a: 1}
+  - {r: 0.7215686, g: 0.8862745, b: 0.9098039, a: 1}

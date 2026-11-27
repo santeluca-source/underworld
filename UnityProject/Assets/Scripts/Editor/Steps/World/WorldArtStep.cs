@@ -334,7 +334,7 @@ namespace Underworld.EditorTools
             d.Add("prop.crate_long", Factory + "box-long.fbx", ArtMeasure.Length, 1.6f);
             d.Add("prop.crate_wide", Factory + "box-wide.fbx", ArtMeasure.Length, 1.4f);
             d.Add("prop.warning_post", Factory + "warning-traffic.fbx", ArtMeasure.Height, 1.2f);
-            d.Add("prop.warning_sign", Factory + "warning-orange.fbx", ArtMeasure.Length, 1.2f);
+            d.Add("prop.warning_sign", Factory + "warning-orange.fbx", ArtMeasure.Height, 1.3f);
 
             // Nature Kit: alberi (collider solo sul tronco), cespugli e fiori (senza collider).
             d.Add("nature.tree_oak", Nature + "tree_oak.fbx", ArtMeasure.Height, 7.0f, ArtCollider.Trunk);
