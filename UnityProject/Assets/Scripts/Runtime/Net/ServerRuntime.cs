@@ -135,6 +135,9 @@ namespace Underworld.Net
             }
         }
 
+        /// <summary>Area giocabile: mondo costruito (se l'area lo costruisce a codice) e almeno un punto di spawn.</summary>
+        public static bool IsAreaPlayable(bool worldBuilt, int spawnCount) => worldBuilt && spawnCount > 0;
+
         void OnLoadEventCompleted(string sceneName, LoadSceneMode mode, List<ulong> completed, List<ulong> timedOut)
         {
             if (IsReady || sceneName != _sceneName) return;
@@ -143,10 +146,12 @@ namespace Underworld.Net
             // senza, i giocatori nascerebbero nel vuoto. Errore fatale, niente server.ready.
             var areaBuilder = Underworld.World.AreaBuilder.Current;
             int spawns = AreaAnchors.OfKind(AnchorKind.Spawn).Count;
-            if (areaBuilder != null && (!areaBuilder.IsBuilt || spawns == 0))
+            // Le aree fatte a mano (Area_TestGround) non hanno AreaBuilder: per loro conta solo lo spawn.
+            bool worldBuilt = areaBuilder == null || areaBuilder.IsBuilt;
+            if (!IsAreaPlayable(worldBuilt, spawns))
             {
                 Debug.LogError($"{NetConstants.ServerLog} Costruzione dell'area {Area} fallita " +
-                               $"(mondo costruito: {areaBuilder.IsBuilt}, punti di spawn: {spawns}). Chiudo il server.");
+                               $"(mondo costruito: {worldBuilt}, punti di spawn: {spawns}). Chiudo il server.");
                 StopServer("costruzione area fallita", 1);
                 return;
             }

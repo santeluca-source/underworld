@@ -106,5 +106,14 @@ namespace Underworld.Tests
             Assert.AreEqual(7705, a.GetInt("localport", 0));
             Assert.AreEqual("TestGround", a.Get("localarea"));
         }
+
+        [Test]
+        public void Server_AreaWithoutWorldOrSpawns_IsNotPlayable()
+        {
+            // Mondo non costruito (eccezione nel costruttore) o nessun punto di spawn: il server non è pronto.
+            Assert.IsFalse(ServerRuntime.IsAreaPlayable(false, 3));
+            Assert.IsFalse(ServerRuntime.IsAreaPlayable(true, 0));
+            Assert.IsTrue(ServerRuntime.IsAreaPlayable(true, 1));
+        }
     }
 }
