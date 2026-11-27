@@ -8,14 +8,14 @@ namespace Underworld.UI
     {
         public const string Id = "credits";
 
-        public CreditsWindow() : base("Crediti", 520f)
+        public CreditsWindow() : base("Credits", 520f)
         {
-            AddRow("Gioco", "Team UNDERWORLD");
-            AddRow("Sviluppo", "Claude (Anthropic) con il team");
-            AddRow("Modelli 3D", "Kenney · kenney.nl · licenza CC0");
-            AddRow("Carattere", "Inter di Rasmus Andersson · licenza SIL OFL 1.1");
-            AddRow("Motore", "Unity 6 · Netcode for GameObjects");
-            Content.Add(UiBuild.Text("Grazie a chi crea risorse libere per tutti", UiClasses.Small, UiClasses.Muted, "uw-credits__thanks"));
+            AddRow("Game", "UNDERWORLD team");
+            AddRow("Development", "Claude (Anthropic) with the team");
+            AddRow("3D models", "Kenney · kenney.nl · CC0 license");
+            AddRow("Font", "Inter by Rasmus Andersson · SIL OFL 1.1 license");
+            AddRow("Engine", "Unity 6 · Netcode for GameObjects");
+            Content.Add(UiBuild.Text("Thanks to everyone who makes free resources for all", UiClasses.Small, UiClasses.Muted, "uw-credits__thanks"));
         }
 
         void AddRow(string role, string who)

@@ -34,15 +34,15 @@ namespace Underworld.UI
             _panel = UiBuild.Glass("uw-pause__panel");
             _panel.RegisterCallback<PointerDownEvent>(e => e.StopPropagation());
             var head = UiBuild.Box("uw-pause__head", PickingMode.Ignore);
-            head.Add(UiBuild.Text("Pausa", "uw-pause__title"));
+            head.Add(UiBuild.Text("Paused", "uw-pause__title"));
             _context = UiBuild.Text(string.Empty, UiClasses.Small, UiClasses.Muted, "uw-pause__context");
             head.Add(_context);
             _panel.Add(head);
 
             _list = UiBuild.Box("uw-pause__list");
-            _list.Add(UiBuild.Button("Riprendi", () => _resume?.Invoke(), UiClasses.ButtonPrimary));
-            _list.Add(UiBuild.Button("Torna al menu", OnBackToMenu, UiClasses.ButtonGhost));
-            _list.Add(UiBuild.Button("Esci dal gioco", OnQuit, UiClasses.ButtonGhost));
+            _list.Add(UiBuild.Button("Resume", () => _resume?.Invoke(), UiClasses.ButtonPrimary));
+            _list.Add(UiBuild.Button("Main menu", OnBackToMenu, UiClasses.ButtonGhost));
+            _list.Add(UiBuild.Button("Quit game", OnQuit, UiClasses.ButtonGhost));
             _panel.Add(_list);
 
             var hint = UiBuild.Box("uw-pause__hint", PickingMode.Ignore);
@@ -50,7 +50,7 @@ namespace Underworld.UI
             key.AddToClassList("uw-keycap--small");
             key.Add(UiBuild.Text("Esc", "uw-keycap__label"));
             hint.Add(key);
-            hint.Add(UiBuild.Text("per tornare al gioco", UiClasses.Small, UiClasses.Muted));
+            hint.Add(UiBuild.Text("to return to the game", UiClasses.Small, UiClasses.Muted));
             _panel.Add(hint);
             Root.Add(_panel);
         }
@@ -62,7 +62,7 @@ namespace Underworld.UI
             if (_visible) return;
             _visible = true;
             string area = HudBus.Area;
-            _context.text = string.IsNullOrEmpty(area) ? "Il mondo continua a muoversi" : area + " · il mondo continua a muoversi";
+            _context.text = string.IsNullOrEmpty(area) ? "The world keeps moving" : area + " · the world keeps moving";
             Root.style.display = DisplayStyle.Flex;
             UiAnim.Set(Root, true);
             UiAnim.In(_scrim, 0.2f);

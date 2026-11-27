@@ -1,28 +1,46 @@
 using System.Collections;
+using System.Globalization;
+using Underworld.Core;
 using UnityEngine;
 
 namespace Underworld.Dev
 {
     /// <summary>
-    /// Test automatico: avvia il gioco con  -autoshot percorso.png
-    /// Dopo 3 secondi salva uno screenshot e chiude. Senza l'argomento non fa niente.
+    /// Screenshot automatico del gioco vero: avvia con  -autoshot percorso.png [-autoshot-delay s]
+    /// Dopo il ritardo (default 3 s) salva lo screenshot e chiude. Nasce da solo al primo caricamento.
+    /// Non fa niente: senza -autoshot, sul server, con -autotest (gli scenari fanno i loro screenshot)
+    /// e con -uipreview (l'anteprima della UI gestisce -autoshot da sola).
     /// </summary>
-    public class AutoScreenshot : MonoBehaviour
+    public sealed class AutoScreenshot : MonoBehaviour
     {
+        /// <summary>Vero se questo processo deve fare lo screenshot automatico.</summary>
+        public static bool ShouldRun(LaunchArgs args) =>
+            !string.IsNullOrEmpty(args.AutoShot) && !args.IsServer && !Application.isBatchMode &&
+            string.IsNullOrEmpty(args.AutoTest) && !args.Has("uipreview") && !args.Has("preview");
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+        static void Boot()
+        {
+            if (!ShouldRun(LaunchArgs.Current)) return;
+            var go = new GameObject("AutoScreenshot");
+            DontDestroyOnLoad(go);
+            go.AddComponent<AutoScreenshot>();
+        }
+
         IEnumerator Start()
         {
-            string path = null;
-            var args = System.Environment.GetCommandLineArgs();
-            for (int i = 0; i < args.Length - 1; i++)
-                if (args[i] == "-autoshot") path = args[i + 1];
-            if (path == null) yield break;
+            var args = LaunchArgs.Current;
+            string path = args.AutoShot;
+            float delay = 3f;
+            if (float.TryParse(args.Get("autoshot-delay", "3"), NumberStyles.Float, CultureInfo.InvariantCulture, out float d)) delay = Mathf.Max(0.5f, d);
 
-            yield return new WaitForSeconds(3f);
+            yield return new WaitForSecondsRealtime(delay);
             yield return new WaitForEndOfFrame();
             ScreenCapture.CaptureScreenshot(path);
-            yield return new WaitForSeconds(1f);
+            yield return new WaitForSecondsRealtime(1f);
             Debug.Log("[AutoScreenshot] salvato " + path);
-            Application.Quit();
+            if (GameServices.Launcher != null) GameServices.Launcher.QuitGame();
+            else Application.Quit();
         }
     }
 }

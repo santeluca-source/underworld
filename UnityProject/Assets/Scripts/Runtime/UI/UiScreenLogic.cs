@@ -28,9 +28,9 @@ namespace Underworld.UI
         public const string MenuScene = "MainMenu";
         public const string BootstrapScene = "Bootstrap";
 
-        /// <summary>Scene di gioco: le aree (Area_*) e la vecchia scena di prova.</summary>
+        /// <summary>Scene di gioco: le aree (Area_*).</summary>
         public static bool IsGameScene(string scene) =>
-            !string.IsNullOrEmpty(scene) && (scene.StartsWith("Area_", StringComparison.Ordinal) || scene == "Downtown_Test");
+            !string.IsNullOrEmpty(scene) && scene.StartsWith("Area_", StringComparison.Ordinal);
 
         /// <summary>Stati del launcher che mostrano un'attesa (avvio, connessione, trasferimento).</summary>
         public static bool IsBusy(LauncherState state) =>

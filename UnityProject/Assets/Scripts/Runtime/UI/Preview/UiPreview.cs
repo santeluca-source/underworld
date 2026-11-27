@@ -119,9 +119,9 @@ namespace Underworld.UI
             root.Menu?.PreviewSetName("Nico");
             root.Menu?.PreviewSetLast(false);
             yield return new WaitForSecondsRealtime(0.4f);
-            _launcher.Set(LauncherState.StartingServer, "Avvio del server di Downtown…");
+            _launcher.Set(LauncherState.StartingServer, "Starting the Downtown server…");
             yield return new WaitForSecondsRealtime(0.9f);
-            _launcher.Set(LauncherState.Connecting, "Connessione a Downtown…");
+            _launcher.Set(LauncherState.Connecting, "Connecting to Downtown…");
             yield return Shot(1.7f);
         }
 
@@ -130,7 +130,7 @@ namespace Underworld.UI
             root.Menu?.PreviewSetName("Nico");
             root.Menu?.PreviewSetLast(true);
             yield return new WaitForSecondsRealtime(0.4f);
-            _launcher.Set(LauncherState.Failed, "Il server non risponde. Controlla l'indirizzo e che la porta 7777 sia aperta.");
+            _launcher.Set(LauncherState.Failed, "The server is not responding. Check the address and that port 7777 is open.");
             yield return Shot(2.6f);
         }
 
@@ -155,21 +155,21 @@ namespace Underworld.UI
             // Vista da strada, come in gioco.
             if (MenuBackdrop.Instance != null) MenuBackdrop.Instance.SetPreset(MenuBackdrop.Preset.StreetDay);
             HudBus.SetCash(12500);
-            _launcher.Set(LauncherState.InGame, "In gioco");
+            _launcher.Set(LauncherState.InGame, "In game");
             yield return new WaitForSecondsRealtime(0.4f);
 
-            HudBus.SetObjective("Porta l'auto al garage di Harbor Lane");
+            HudBus.SetObjective("Drive the car to the Harbor Lane garage");
             yield return new WaitForSecondsRealtime(0.2f);
-            HudBus.SetPrompt("Apri il garage");
-            HudBus.Toast("Partita salvata", ToastKind.Info);
+            HudBus.SetPrompt("Open the garage");
+            HudBus.Toast("Game saved", ToastKind.Info);
             yield return new WaitForSecondsRealtime(0.3f);
             HudBus.SetWanted(2);
-            HudBus.Toast("La polizia ti sta cercando", ToastKind.Warning);
+            HudBus.Toast("The police are looking for you", ToastKind.Warning);
             yield return new WaitForSecondsRealtime(0.3f);
             HudBus.SetArea(AreaInfo.DisplayName(AreaId.Downtown));
             yield return new WaitForSecondsRealtime(0.4f);
             HudBus.SetCash(14750);
-            HudBus.Toast("Consegna riuscita: +2.250 $", ToastKind.Success);
+            HudBus.Toast("Delivery complete: +$2,250", ToastKind.Success);
 
             if (pause)
             {
@@ -224,11 +224,11 @@ namespace Underworld.UI
 
             public SampleWindow() : base("Garage", 520f)
             {
-                AddRow("Berlina grigia", "Pronta", false);
-                AddRow("Furgone da consegne", "Pronto", false);
-                AddRow("Coupé rossa", "In riparazione · 2 min", true);
-                AddFooterButton("Chiudi", Close);
-                AddFooterButton("Prendi l'auto", Close, true);
+                AddRow("Gray sedan", "Ready", false);
+                AddRow("Delivery van", "Ready", false);
+                AddRow("Red coupe", "In repair · 2 min", true);
+                AddFooterButton("Close", Close);
+                AddFooterButton("Take the car", Close, true);
             }
 
             protected internal override void OnOpened() => Debug.Log("[UiPreview] finestra aperta: " + Title);
@@ -271,7 +271,7 @@ namespace Underworld.UI
         {
             _simulating = true;
             _timer = 0f;
-            Set(LauncherState.StartingServer, "Avvio del server di Downtown…");
+            Set(LauncherState.StartingServer, "Starting the Downtown server…");
         }
 
         /// <summary>Fa avanzare la simulazione (chiamato da UiPreview).</summary>
@@ -279,14 +279,14 @@ namespace Underworld.UI
         {
             if (!_simulating) return;
             _timer += dt;
-            if (State == LauncherState.StartingServer && _timer > 1.5f) Set(LauncherState.Connecting, "Connessione a Downtown…");
+            if (State == LauncherState.StartingServer && _timer > 1.5f) Set(LauncherState.Connecting, "Connecting to Downtown…");
             else if (State == LauncherState.Connecting && _timer > 3f)
             {
                 _simulating = false;
                 HudBus.SetCash(5000);
                 HudBus.SetArea(AreaInfo.DisplayName(AreaId.Downtown));
                 if (MenuBackdrop.Instance != null) MenuBackdrop.Instance.SetPreset(MenuBackdrop.Preset.StreetDay);
-                Set(LauncherState.InGame, "In gioco");
+                Set(LauncherState.InGame, "In game");
             }
         }
 

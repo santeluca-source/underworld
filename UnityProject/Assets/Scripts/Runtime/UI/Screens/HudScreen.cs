@@ -76,8 +76,9 @@ namespace Underworld.UI
             _cashRow = UiBuild.Box("uw-cash", PickingMode.Ignore);
             _cashValue = UiBuild.Text("0", "uw-cash__value", UiClasses.Tabular, UiClasses.Shadowed);
             var currency = UiBuild.Text(UiFormat.Currency, "uw-cash__currency", UiClasses.Shadowed);
-            _cashRow.Add(_cashValue);
+            // Formato inglese (US): il simbolo va prima del numero ("$12,500").
             _cashRow.Add(currency);
+            _cashRow.Add(_cashValue);
             _rightColumn.Add(_cashRow);
 
             _cashDelta = UiBuild.Text(string.Empty, "uw-cash__delta", UiClasses.Tabular, UiClasses.Shadowed);

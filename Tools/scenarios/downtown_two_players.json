@@ -1,0 +1,11 @@
+{
+  "description": "Server Downtown + A (con grafica, finestra piccola, schermo 2) + B (bot senza grafica). Tutti e due partono da uno spawn downtown.spawn.* e si vedono; B va alla bacheca delle missioni; A lo vede arrivare, cammina verso la bacheca, fa lo screenshot con B e l'HUD, misura FPS e batch, poi Esc apre e chiude la pausa (screenshot). Il server misura memoria e CPU.",
+  "timeoutSec": 180,
+  "servers": [
+    { "area": "Downtown", "autotest": "downtown_two_players.server" }
+  ],
+  "clients": [
+    { "name": "Walker", "autotest": "downtown_two_players.walker", "graphics": false, "holdUntilOthersDone": true },
+    { "name": "Viewer", "autotest": "downtown_two_players.viewer", "graphics": true, "args": ["-shots", "{tmp}/shots"] }
+  ]
+}

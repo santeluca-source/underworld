@@ -6,7 +6,7 @@ namespace Underworld.UI
 {
     /// <summary>
     /// Attesa a schermo pieno fuori dal menu: connessione diretta (-connect), trasferimento tra aree, errore.
-    /// Testo dello stato dal launcher (StatusText) e un'uscita sempre disponibile ("Torna al menu").
+    /// Testo dello stato dal launcher (StatusText) e un'uscita sempre disponibile ("Main menu").
     /// </summary>
     public sealed class LoadingOverlay
     {
@@ -34,14 +34,14 @@ namespace Underworld.UI
             _spinner.AddToClassList("uw-status__spinner");
             _errorIcon = new UiIcon(IconKind.Error, 22f);
             _errorIcon.AddToClassList("uw-icon--danger");
-            _title = UiBuild.Text("Caricamento", UiClasses.Heading);
+            _title = UiBuild.Text("Loading", UiClasses.Heading);
             head.Add(_spinner);
             head.Add(_errorIcon);
             head.Add(_title);
             _center.Add(head);
             _text = UiBuild.Text(string.Empty, UiClasses.Body, UiClasses.Muted, "uw-loading__text");
             _center.Add(_text);
-            _back = UiBuild.Button("Torna al menu", OnBack, UiClasses.ButtonGhost);
+            _back = UiBuild.Button("Main menu", OnBack, UiClasses.ButtonGhost);
             _back.AddToClassList("uw-loading__back");
             _center.Add(_back);
             Root.Add(_center);
@@ -76,14 +76,14 @@ namespace Underworld.UI
             _errorIcon.style.display = failed ? DisplayStyle.Flex : DisplayStyle.None;
             _title.text = state switch
             {
-                LauncherState.StartingServer => "Avvio dei server",
-                LauncherState.Connecting => "Connessione",
-                LauncherState.Transferring => "Cambio di area",
-                LauncherState.Failed => "Connessione persa",
-                _ => "Caricamento",
+                LauncherState.StartingServer => "Starting the server",
+                LauncherState.Connecting => "Connecting",
+                LauncherState.Transferring => "Changing area",
+                LauncherState.Failed => "Connection lost",
+                _ => "Loading",
             };
             string status = l != null ? l.StatusText : null;
-            _text.text = string.IsNullOrEmpty(status) ? (failed ? "Il server non risponde" : "Attendi qualche secondo") : status;
+            _text.text = string.IsNullOrEmpty(status) ? (failed ? "The server is not responding" : "Please wait a few seconds") : status;
         }
 
         public void Tick(float dt)

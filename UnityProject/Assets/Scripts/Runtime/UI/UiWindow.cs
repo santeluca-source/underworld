@@ -12,7 +12,7 @@ namespace Underworld.UI
     /// <code>
     /// var w = new UiWindow("Garage");
     /// w.Content.Add(new Label("Nessun veicolo"));
-    /// w.AddFooterButton("Chiudi", w.Close);
+    /// w.AddFooterButton("Close", w.Close);
     /// w.Open();
     /// </code>
     /// Oppure si registra una fabbrica: <c>UiRegistry.RegisterWindow("garage", () => new GarageWindow())</c>
@@ -69,7 +69,7 @@ namespace Underworld.UI
 
             var header = UiBuild.Box("uw-window__header");
             _title = UiBuild.Text(title, "uw-window__title");
-            var close = UiBuild.IconButton(IconKind.Close, Close, "Chiudi");
+            var close = UiBuild.IconButton(IconKind.Close, Close, "Close");
             close.AddToClassList("uw-window__close");
             header.Add(_title);
             header.Add(close);

@@ -195,7 +195,7 @@ function Invoke-Scenario([string]$file, [int]$index, [string]$runDir) {
             $out = Join-Path $tmp "client_$safe.result.json"
             $a = @("-name", $cname, "-profile", (Join-Path $tmp "profile_$safe"), "-logFile", $log,
                    "-autotest", $c.autotest, "-autotest-out", $out, "-autotest-timeout", [string]$procTimeout)
-            if ($c.graphics) { $a += @("-screen-width", "960", "-screen-height", "540", "-screen-fullscreen", "0") }
+            if ($c.graphics) { $a += @("-screen-width", "960", "-screen-height", "540", "-screen-fullscreen", "0", "-monitor", "2") }  # schermo 2: l'utente lavora sul primo
             else { $a += @("-batchmode", "-nographics") }
             $serverIndex = if ($null -ne $c.server) { [int]$c.server } else { 0 }
             if ($serverIndex -ge 0) { $a += @("-connect", ("127.0.0.1:" + [string]($base + $serverIndex))) }

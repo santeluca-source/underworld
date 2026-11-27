@@ -71,7 +71,7 @@ namespace Underworld.UI
             // Titolo gigante. Nessuna etichetta sopra, nessun punto finale.
             _titleBlock = UiBuild.Box("uw-menu__title-block", PickingMode.Ignore);
             _titleBlock.Add(UiBuild.Text("UNDERWORLD", "uw-menu__title"));
-            _titleBlock.Add(UiBuild.Text("La città non dorme mai", "uw-menu__tagline"));
+            _titleBlock.Add(UiBuild.Text("The city never sleeps", "uw-menu__tagline"));
             Root.Add(_titleBlock);
 
             _panel = UiBuild.Glass("uw-menu__panel");
@@ -90,7 +90,7 @@ namespace Underworld.UI
             _views[View.Home].style.display = DisplayStyle.Flex;
 
             _footer = UiBuild.Box("uw-menu__footer", PickingMode.Ignore);
-            _footer.Add(UiBuild.Text("Prototipo in sviluppo", UiClasses.Small, UiClasses.Muted));
+            _footer.Add(UiBuild.Text("Prototype in development", UiClasses.Small, UiClasses.Muted));
             Root.Add(_footer);
         }
 
@@ -101,7 +101,7 @@ namespace Underworld.UI
             var v = UiBuild.Box("uw-menu__view");
             string saved = PlayerPrefs.GetString(PrefName, string.Empty);
             if (string.IsNullOrEmpty(saved)) saved = LaunchArgs.Current.PlayerName ?? string.Empty;
-            _name = UiBuild.Field("Il tuo nome", saved, "Scrivi il tuo nome", PlayerNameRules.MaxLength, out _nameField, out _nameHint);
+            _name = UiBuild.Field("Your name", saved, "Enter your name", PlayerNameRules.MaxLength, out _nameField, out _nameHint);
             _name.RegisterValueChangedCallback(_ => { _nameTouched = true; RefreshNameHint(); });
             _name.RegisterCallback<KeyDownEvent>(e =>
             {
@@ -111,14 +111,14 @@ namespace Underworld.UI
             RefreshNameHint();
 
             var actions = UiBuild.Box("uw-menu__actions");
-            actions.Add(UiBuild.Button("Gioca", OnPlay, UiClasses.ButtonPrimary));
-            actions.Add(TwoLineButton("Gioca con amici", "Gli amici entrano con il tuo indirizzo IP", OnHost));
-            actions.Add(TwoLineButton("Unisciti", "Entra nella partita di un amico", () => ShowView(View.Join)));
+            actions.Add(UiBuild.Button("Play", OnPlay, UiClasses.ButtonPrimary));
+            actions.Add(TwoLineButton("Play with friends", "Friends join with your IP address", OnHost));
+            actions.Add(TwoLineButton("Join", "Join a friend's game", () => ShowView(View.Join)));
             v.Add(actions);
 
             var secondary = UiBuild.Box("uw-menu__secondary");
-            secondary.Add(UiBuild.Button("Crediti", () => UiWindows.Open(CreditsWindow.Id), UiClasses.ButtonQuiet));
-            secondary.Add(UiBuild.Button("Esci", OnQuit, UiClasses.ButtonQuiet));
+            secondary.Add(UiBuild.Button("Credits", () => UiWindows.Open(CreditsWindow.Id), UiClasses.ButtonQuiet));
+            secondary.Add(UiBuild.Button("Quit", OnQuit, UiClasses.ButtonQuiet));
             v.Add(secondary);
             return v;
         }
@@ -135,12 +135,12 @@ namespace Underworld.UI
         VisualElement BuildJoin()
         {
             var v = UiBuild.Box("uw-menu__view");
-            v.Add(ViewHeader("Unisciti a una partita", () => ShowView(View.Home)));
+            v.Add(ViewHeader("Join a game", () => ShowView(View.Home)));
 
             string addr = PlayerPrefs.GetString(PrefJoinAddress, "127.0.0.1");
             int port = PlayerPrefs.GetInt(PrefJoinPort, JoinAddress.DefaultPort);
-            _joinAddress = UiBuild.Field("Indirizzo IP", addr, "192.168.1.20", 64, out var addrField, out _);
-            _joinPort = UiBuild.Field("Porta", port.ToString(), "7777", 5, out var portField, out _);
+            _joinAddress = UiBuild.Field("IP address", addr, "192.168.1.20", 64, out var addrField, out _);
+            _joinPort = UiBuild.Field("Port", port.ToString(), "7777", 5, out var portField, out _);
             var row = UiBuild.Box("uw-menu__row");
             addrField.AddToClassList("uw-grow");
             portField.AddToClassList("uw-menu__port");
@@ -148,7 +148,7 @@ namespace Underworld.UI
             row.Add(portField);
             v.Add(row);
 
-            _joinError = UiBuild.Text("Chiedi l'indirizzo all'amico che ospita la partita", UiClasses.FieldHint, "uw-menu__join-hint");
+            _joinError = UiBuild.Text("Ask the friend who hosts the game for the address", UiClasses.FieldHint, "uw-menu__join-hint");
             v.Add(_joinError);
 
             // Invio nei campi = Collegati.
@@ -160,7 +160,7 @@ namespace Underworld.UI
             _joinPort.RegisterCallback(enter, TrickleDown.TrickleDown);
 
             var actions = UiBuild.Box("uw-menu__actions");
-            actions.Add(UiBuild.Button("Collegati", OnJoin, UiClasses.ButtonPrimary));
+            actions.Add(UiBuild.Button("Connect", OnJoin, UiClasses.ButtonPrimary));
             v.Add(actions);
             return v;
         }
@@ -171,7 +171,7 @@ namespace Underworld.UI
             var head = UiBuild.Box("uw-status__head");
             _busySpinner = new UiIcon(IconKind.Arc, 20f) { Stroke = 2.5f };
             _busySpinner.AddToClassList("uw-status__spinner");
-            _busyTitle = UiBuild.Text("Avvio della partita", UiClasses.Heading);
+            _busyTitle = UiBuild.Text("Starting the game", UiClasses.Heading);
             head.Add(_busySpinner);
             head.Add(_busyTitle);
             v.Add(head);
@@ -188,7 +188,7 @@ namespace Underworld.UI
             v.Add(_barTrack);
 
             var actions = UiBuild.Box("uw-menu__actions");
-            actions.Add(UiBuild.Button("Annulla", OnCancel, UiClasses.ButtonGhost));
+            actions.Add(UiBuild.Button("Cancel", OnCancel, UiClasses.ButtonGhost));
             v.Add(actions);
             return v;
         }
@@ -199,7 +199,7 @@ namespace Underworld.UI
             var head = UiBuild.Box("uw-status__head");
             var icon = new UiIcon(IconKind.Error, 20f);
             icon.AddToClassList("uw-icon--danger");
-            _errorTitle = UiBuild.Text("Connessione non riuscita", UiClasses.Heading);
+            _errorTitle = UiBuild.Text("Connection failed", UiClasses.Heading);
             head.Add(icon);
             head.Add(_errorTitle);
             v.Add(head);
@@ -207,9 +207,9 @@ namespace Underworld.UI
             v.Add(_errorText);
 
             var actions = UiBuild.Box("uw-menu__actions-row");
-            _retry = UiBuild.Button("Riprova", OnRetry, UiClasses.ButtonPrimary);
+            _retry = UiBuild.Button("Retry", OnRetry, UiClasses.ButtonPrimary);
             _retry.AddToClassList("uw-grow");
-            var back = UiBuild.Button("Indietro", DismissFailure, UiClasses.ButtonGhost);
+            var back = UiBuild.Button("Back", DismissFailure, UiClasses.ButtonGhost);
             back.AddToClassList("uw-grow");
             actions.Add(_retry);
             actions.Add(back);
@@ -224,12 +224,12 @@ namespace Underworld.UI
             var icon = new UiIcon(IconKind.Info, 20f);
             icon.AddToClassList("uw-icon--info");
             head.Add(icon);
-            head.Add(UiBuild.Text("Partita non disponibile", UiClasses.Heading));
+            head.Add(UiBuild.Text("Game not available", UiClasses.Heading));
             v.Add(head);
-            v.Add(UiBuild.Text("Questa versione non contiene ancora la parte di rete. Il gioco in rete arriva con il prossimo aggiornamento.",
+            v.Add(UiBuild.Text("This version does not include online play yet. It comes with the next update.",
                 UiClasses.Body, UiClasses.Muted, "uw-status__text"));
             var actions = UiBuild.Box("uw-menu__actions");
-            actions.Add(UiBuild.Button("Indietro", () => ShowView(View.Home), UiClasses.ButtonGhost));
+            actions.Add(UiBuild.Button("Back", () => ShowView(View.Home), UiClasses.ButtonGhost));
             v.Add(actions);
             return v;
         }
@@ -237,7 +237,7 @@ namespace Underworld.UI
         static VisualElement ViewHeader(string title, Action back)
         {
             var head = UiBuild.Box("uw-view-header");
-            var b = UiBuild.IconButton(IconKind.ChevronLeft, back, "Indietro");
+            var b = UiBuild.IconButton(IconKind.ChevronLeft, back, "Back");
             b.AddToClassList("uw-view-header__back");
             head.Add(b);
             head.Add(UiBuild.Text(title, UiClasses.Heading));
@@ -336,7 +336,7 @@ namespace Underworld.UI
             if (Launcher == null) { ShowView(View.Unavailable); return; }
             _last = action;
             _failureDismissed = false;
-            ShowBusy(action == PendingAction.Host ? "Avvio della partita con amici" : "Avvio della partita", "Preparazione…");
+            ShowBusy(action == PendingAction.Host ? "Starting the game with friends" : "Starting the game", "Getting ready…");
             if (action == PendingAction.Host) Launcher.HostForFriends(name);
             else Launcher.PlayLocal(name);
             RefreshFromLauncher(false);
@@ -352,7 +352,7 @@ namespace Underworld.UI
                 return;
             }
             _joinError.RemoveFromClassList("uw-field__hint--error");
-            _joinError.text = "Chiedi l'indirizzo all'amico che ospita la partita";
+            _joinError.text = "Ask the friend who hosts the game for the address";
             if (!TryGetName(out string name)) { ShowView(View.Home); return; }
             SaveName(name);
             PlayerPrefs.SetString(PrefJoinAddress, ip);
@@ -363,7 +363,7 @@ namespace Underworld.UI
             _lastIp = ip;
             _lastPort = port;
             _failureDismissed = false;
-            ShowBusy("Connessione a " + ip, "Preparazione…");
+            ShowBusy("Connecting to " + ip, "Getting ready…");
             Launcher.Join(ip, port, name);
             RefreshFromLauncher(false);
         }
@@ -408,7 +408,7 @@ namespace Underworld.UI
             var check = PlayerNameRules.Check(_name.value);
             bool showError = _nameTouched && check != NameCheck.Ok;
             _nameHint.text = check == NameCheck.Ok || !_nameTouched
-                ? (check == NameCheck.Ok ? PlayerNameRules.Message(NameCheck.Ok) : "Da 3 a 16 caratteri: lettere, numeri, spazio, _ e -")
+                ? (check == NameCheck.Ok ? PlayerNameRules.Message(NameCheck.Ok) : "3 to 16 characters: letters, numbers, space, _ and -")
                 : PlayerNameRules.Message(check);
             _nameField.EnableInClassList(UiClasses.FieldInvalid, showError);
             _nameField.EnableInClassList(UiClasses.FieldValid, check == NameCheck.Ok);
@@ -437,14 +437,14 @@ namespace Underworld.UI
                 case LauncherState.Connecting:
                 case LauncherState.Transferring:
                     if (_view != View.Busy) ShowBusy(DefaultBusyTitle(), l.StatusText);
-                    _busyText.text = string.IsNullOrEmpty(l.StatusText) ? "Attendi…" : l.StatusText;
+                    _busyText.text = string.IsNullOrEmpty(l.StatusText) ? "Please wait…" : l.StatusText;
                     UpdateSteps(l.State);
                     break;
                 case LauncherState.Failed:
                     if (changed) _failureDismissed = false;
                     if (!_failureDismissed)
                     {
-                        _errorText.text = string.IsNullOrEmpty(l.StatusText) ? "Qualcosa non ha funzionato. Riprova tra poco." : l.StatusText;
+                        _errorText.text = string.IsNullOrEmpty(l.StatusText) ? "Something went wrong. Try again in a moment." : l.StatusText;
                         _retry.style.display = _last == PendingAction.None ? DisplayStyle.None : DisplayStyle.Flex;
                         if (_view != View.Error) ShowView(View.Error, !entering);
                     }
@@ -460,12 +460,12 @@ namespace Underworld.UI
             }
         }
 
-        string DefaultBusyTitle() => _last == PendingAction.Join ? "Connessione" : _last == PendingAction.Host ? "Avvio della partita con amici" : "Avvio della partita";
+        string DefaultBusyTitle() => _last == PendingAction.Join ? "Connecting" : _last == PendingAction.Host ? "Starting the game with friends" : "Starting the game";
 
         void ShowBusy(string title, string text)
         {
             _busyTitle.text = title;
-            _busyText.text = string.IsNullOrEmpty(text) ? "Attendi…" : text;
+            _busyText.text = string.IsNullOrEmpty(text) ? "Please wait…" : text;
             BuildSteps();
             UpdateSteps(Launcher != null ? Launcher.State : LauncherState.StartingServer);
             if (_view != View.Busy) ShowView(View.Busy);
@@ -477,8 +477,8 @@ namespace Underworld.UI
             if (_last == PendingAction.Join) { _steps.style.display = DisplayStyle.None; return; }
             _steps.style.display = DisplayStyle.Flex;
             AddStep("Server");
-            AddStep("Connessione");
-            AddStep("In città");
+            AddStep("Connect");
+            AddStep("In the city");
         }
 
         void AddStep(string label)

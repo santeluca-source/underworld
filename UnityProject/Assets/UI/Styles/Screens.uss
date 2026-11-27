@@ -210,7 +210,7 @@
     -unity-font-definition: url("../Fonts/Inter-SemiBold.ttf");
     font-size: var(--uw-type-28);
     color: var(--uw-accent);
-    margin-left: 6px;
+    margin-right: 4px;
     margin-bottom: 6px;
 }
 

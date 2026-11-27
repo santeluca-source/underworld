@@ -106,7 +106,7 @@ namespace Underworld.Net
             _userDisconnect = true;
             if (_nm != null && _nm.IsListening) _nm.Shutdown();
             _clientRunning = false;
-            SetState(LauncherState.Idle, "Sei uscito dalla partita.");
+            SetState(LauncherState.Idle, "You left the game.");
             GameRoot.LoadMainMenuIfPresent();
         }
 
@@ -164,7 +164,7 @@ namespace Underworld.Net
 
         IEnumerator JoinFlow(string address, ushort port, string playerName)
         {
-            _inGameStatus = $"In gioco su {address}:{port}.";
+            _inGameStatus = $"Playing on {address}:{port}.";
             yield return ConnectWithRetry(address, port, playerName, Time.realtimeSinceStartup + JoinTimeout, null);
             _flow = null;
         }
@@ -176,7 +176,7 @@ namespace Underworld.Net
             string areaArg = args.Get("localarea");
             if (!string.IsNullOrEmpty(areaArg) && !Enum.TryParse(areaArg, true, out area))
             {
-                Fail($"Area sconosciuta: {areaArg}.");
+                Fail($"Unknown area: {areaArg}.");
                 yield break;
             }
             ushort port = (ushort)Mathf.Clamp(args.GetInt("localport", AreaInfo.DefaultPort(area)), 1, 65535);
@@ -189,7 +189,7 @@ namespace Underworld.Net
             if (!reuse)
             {
                 yield return StopChildServer();
-                SetState(LauncherState.StartingServer, "Avvio del server sul tuo PC...");
+                SetState(LauncherState.StartingServer, "Starting the server on your PC...");
                 if (!TryStartChildServer(area, port, dataDir, forFriends, out string error))
                 {
                     Fail(error);
@@ -201,7 +201,7 @@ namespace Underworld.Net
                 {
                     if (ChildServerPid == 0)
                     {
-                        Fail($"Il server sul tuo PC si è chiuso subito. Guarda il log: {ChildLogPath(dataDir)}");
+                        Fail($"The server on your PC closed right away. See the log: {ChildLogPath(dataDir)}");
                         yield break;
                     }
                     yield return new WaitForSecondsRealtime(0.25f);
@@ -211,9 +211,9 @@ namespace Underworld.Net
             string lan = forFriends ? LocalNetworkInfo.GetLanIPv4() : null;
             _inGameStatus = forFriends
                 ? (lan != null
-                    ? $"Server aperto agli amici: {lan}:{port}. Apri la porta {port} UDP sul router per chi gioca fuori casa."
-                    : $"Server aperto agli amici sulla porta {port}, ma non trovo l'indirizzo di rete di questo PC.")
-                : $"In gioco sul tuo PC: {AreaInfo.DisplayName(area)}.";
+                    ? $"Server open to friends: {lan}:{port}. Open UDP port {port} on your router for friends outside your home."
+                    : $"Server open to friends on port {port}, but this PC's network address was not found.")
+                : $"Playing on your PC: {AreaInfo.DisplayName(area)}.";
 
             yield return ConnectWithRetry("127.0.0.1", port, playerName, deadline, () => ChildServerPid != 0);
             _flow = null;
@@ -231,12 +231,12 @@ namespace Underworld.Net
             {
                 attempt++;
                 SetState(LauncherState.Connecting, attempt == 1
-                    ? $"Collegamento a {address}:{port}..."
-                    : $"Collegamento a {address}:{port}... (tentativo {attempt})");
+                    ? $"Connecting to {address}:{port}..."
+                    : $"Connecting to {address}:{port}... (attempt {attempt})");
 
                 if (!StartClient(address, port, playerName, deadline))
                 {
-                    Fail("Impossibile avviare la connessione. Controlla indirizzo e porta.");
+                    Fail("Could not start the connection. Check the address and port.");
                     yield break;
                 }
 
@@ -247,7 +247,7 @@ namespace Underworld.Net
                     if (Time.realtimeSinceStartup > spawnDeadline)
                     {
                         _nm.Shutdown();
-                        Fail("Il server non ha creato il personaggio in tempo.");
+                        Fail("The server did not create your character in time.");
                         yield break;
                     }
                     yield return null;
@@ -260,8 +260,8 @@ namespace Underworld.Net
                 bool alive = serverAlive == null || serverAlive();
                 if (!retryable || !alive || Time.realtimeSinceStartup + wait > deadline)
                 {
-                    if (!alive && code == null) text = "Il server sul tuo PC si è chiuso.";
-                    else if (code == null) text = $"Il server {address}:{port} non risponde.";
+                    if (!alive && code == null) text = "The server on your PC has closed.";
+                    else if (code == null) text = $"The server {address}:{port} is not responding.";
                     LastReasonCode = code;
                     LastReasonText = text;
                     Fail(text);
@@ -325,8 +325,8 @@ namespace Underworld.Net
             {
                 // Disconnessione inattesa durante la partita: mostra il motivo e torna al menu.
                 LastReasonCode = code;
-                LastReasonText = text ?? "Connessione con il server persa.";
-                Fail("Disconnesso: " + LastReasonText);
+                LastReasonText = text ?? "Lost connection to the server.";
+                Fail("Disconnected: " + LastReasonText);
                 GameRoot.LoadMainMenuIfPresent();
             }
         }
@@ -334,7 +334,7 @@ namespace Underworld.Net
         void OnLocalPlayerSpawned(PlayerNetwork player)
         {
             if (_nm == null || _nm.IsServer) return;
-            SetState(LauncherState.InGame, _inGameStatus ?? "In gioco.");
+            SetState(LauncherState.InGame, _inGameStatus ?? "In game.");
             HudBus.SetArea(AreaInfo.DisplayName(GuessArea()));
         }
 
@@ -379,7 +379,7 @@ namespace Underworld.Net
             }
             catch (Exception e)
             {
-                error = $"Cartella del server non valida: {dataDir} ({e.Message}).";
+                error = $"Invalid server folder: {dataDir} ({e.Message}).";
                 return false;
             }
 
@@ -401,7 +401,7 @@ namespace Underworld.Net
                 _child = Process.Start(psi);
                 if (_child == null)
                 {
-                    error = "Il server sul tuo PC non è partito.";
+                    error = "The server on your PC did not start.";
                     return false;
                 }
                 _childForFriends = forFriends;
@@ -412,7 +412,7 @@ namespace Underworld.Net
             }
             catch (Exception e)
             {
-                error = $"Non riesco ad avviare il server: {e.Message}";
+                error = $"Could not start the server: {e.Message}";
                 return false;
             }
         }
@@ -431,7 +431,7 @@ namespace Underworld.Net
             string project = Directory.GetParent(Application.dataPath)?.FullName ?? ".";
             string exe = Path.Combine(project, "Builds", "Windows", "UNDERWORLD.exe");
             if (File.Exists(exe)) return exe;
-            error = "Nell'editor \"Gioca\" usa la build del gioco, ma non la trovo. Crea prima la build (UNDERWORLD > Build Windows).";
+            error = "In the editor, \"Play\" uses the game build, but it was not found. Make the build first (UNDERWORLD > Build Windows).";
             return null;
 #else
             try
@@ -449,7 +449,7 @@ namespace Underworld.Net
             string dataParent = Directory.GetParent(Application.dataPath)?.FullName ?? ".";
             string guess = Path.Combine(dataParent, "UNDERWORLD.exe");
             if (File.Exists(guess)) return guess;
-            error = "Non trovo l'eseguibile del gioco per avviare il server.";
+            error = "The game executable was not found, so the server cannot start.";
             return null;
 #endif
         }

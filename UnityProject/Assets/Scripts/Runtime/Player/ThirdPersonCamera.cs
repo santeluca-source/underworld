@@ -58,6 +58,13 @@ namespace Underworld.Player
             UpdateCursor();
         }
 
+        /// <summary>Gira la camera intorno al personaggio (gradi). Per test, filmati e "guarda là".</summary>
+        public void SetView(float yaw, float pitch)
+        {
+            _yaw = yaw;
+            _pitch = Mathf.Clamp(pitch, minPitch, maxPitch);
+        }
+
         /// <summary>
         /// Collega la camera principale della scena a un personaggio. Se la scena non ha una camera,
         /// la crea (Camera + AudioListener + ThirdPersonCamera).

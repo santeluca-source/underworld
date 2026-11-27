@@ -7,10 +7,10 @@ namespace Underworld.UI
     /// </summary>
     public static class UiFormat
     {
-        /// <summary>Simbolo della valuta del gioco. Va dopo il numero, come in italiano: "12.500 $".</summary>
+        /// <summary>Simbolo della valuta del gioco. Va prima del numero, come in inglese (US): "$12,500".</summary>
         public const string Currency = "$";
 
-        /// <summary>Numero intero con il punto delle migliaia: 12500 → "12.500", -5000 → "-5.000".</summary>
+        /// <summary>Numero intero con la virgola delle migliaia (inglese US): 12500 → "12,500", -5000 → "-5,000".</summary>
         public static string Thousands(long value)
         {
             if (value == 0) return "0";
@@ -23,7 +23,7 @@ namespace Underworld.UI
             int digits = 0;
             while (v > 0)
             {
-                if (digits > 0 && digits % 3 == 0) buf[--pos] = '.';
+                if (digits > 0 && digits % 3 == 0) buf[--pos] = ',';
                 buf[--pos] = (char)('0' + (int)(v % 10));
                 v /= 10;
                 digits++;
@@ -32,10 +32,11 @@ namespace Underworld.UI
             return new string(buf.Slice(pos));
         }
 
-        /// <summary>Soldi in formato italiano: 12500 → "12.500 $".</summary>
-        public static string Money(long value) => Thousands(value) + " " + Currency;
+        /// <summary>Soldi in formato inglese (US): 12500 → "$12,500", -300 → "-$300".</summary>
+        public static string Money(long value) =>
+            value < 0 ? "-" + Currency + Thousands(value).Substring(1) : Currency + Thousands(value);
 
-        /// <summary>Differenza di soldi con il segno: 2500 → "+2.500 $", -300 → "-300 $".</summary>
+        /// <summary>Differenza di soldi con il segno: 2500 → "+$2,500", -300 → "-$300".</summary>
         public static string MoneyDelta(long delta) => (delta > 0 ? "+" : "") + Money(delta);
     }
 
@@ -73,11 +74,11 @@ namespace Underworld.UI
         /// <summary>Messaggio per il giocatore (frasi brevi, senza punto finale).</summary>
         public static string Message(NameCheck check) => check switch
         {
-            NameCheck.Ok => "Gli altri giocatori vedranno questo nome",
-            NameCheck.Empty => "Scegli un nome per giocare",
-            NameCheck.TooShort => "Servono almeno 3 caratteri",
-            NameCheck.TooLong => "Al massimo 16 caratteri",
-            NameCheck.InvalidChar => "Usa solo lettere, numeri, spazio, _ e -",
+            NameCheck.Ok => "Other players will see this name",
+            NameCheck.Empty => "Choose a name to play",
+            NameCheck.TooShort => "Use at least 3 characters",
+            NameCheck.TooLong => "Use at most 16 characters",
+            NameCheck.InvalidChar => "Use only letters, numbers, space, _ and -",
             _ => string.Empty,
         };
     }
@@ -101,7 +102,7 @@ namespace Underworld.UI
 
             if (address.Length == 0)
             {
-                error = "Scrivi l'indirizzo IP del server";
+                error = "Enter the server IP address";
                 return false;
             }
 
@@ -111,7 +112,7 @@ namespace Underworld.UI
             {
                 if (address.IndexOf(':', colon + 1) >= 0)
                 {
-                    error = "Gli indirizzi IPv6 non sono ancora supportati";
+                    error = "IPv6 addresses are not supported yet";
                     return false;
                 }
                 portText = address.Substring(colon + 1).Trim();
@@ -122,14 +123,14 @@ namespace Underworld.UI
 
             if (!IsIPv4(address))
             {
-                error = "Indirizzo non valido. Esempio: 192.168.1.20";
+                error = "Invalid address. Example: 192.168.1.20";
                 return false;
             }
 
             if (portText.Length == 0) port = DefaultPort;
             else if (!ushort.TryParse(portText, out port) || port == 0)
             {
-                error = "Porta non valida: usa un numero da 1 a 65535";
+                error = "Invalid port: use a number from 1 to 65535";
                 return false;
             }
 

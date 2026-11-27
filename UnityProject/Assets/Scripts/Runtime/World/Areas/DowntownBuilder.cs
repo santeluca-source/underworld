@@ -350,7 +350,7 @@ namespace Underworld.World.Areas
             _ctx.Box(mb + new Vector3(0f, 1.75f, 0f), new Vector3(3.4f, 1.7f, 0.18f), Pal.WoodDark, 0f, false, BoxFaces.All);
             _ctx.Box(mb + new Vector3(0f, 1.7f, 0.1f), new Vector3(3.0f, 1.3f, 0.04f), Pal.ScreenBlue, 0f, false, BoxFaces.All & ~BoxFaces.NegZ);
             _ctx.Box(mb + new Vector3(0f, 2.75f, 0f), new Vector3(3.6f, 0.3f, 0.5f), Pal.Black, 0f, false, BoxFaces.All);
-            _ctx.Text("MISSIONI", mb + new Vector3(0f, 1.95f, 0.12f), 0f, 0.058f, Pal.SignWhite, 0.03f);
+            _ctx.Text("MISSIONS", mb + new Vector3(0f, 1.95f, 0.12f), 0f, 0.058f, Pal.SignWhite, 0.03f);
             _ctx.Text("$", mb + new Vector3(0f, 1.38f, 0.12f), 0f, 0.07f, Pal.SignYellow, 0.03f);
             _ctx.Anchor("mission.board", AnchorKind.MissionBoard, mb + new Vector3(0f, 0f, 1.6f), 180f, 2.5f);
         }
@@ -395,7 +395,7 @@ namespace Underworld.World.Areas
                 float hw = 8.5f - i * 2.1f;
                 _ctx.BoxMinMax(new Vector3(bx - hw, plinth + 9.5f + i * 0.55f, bz - 10.1f), new Vector3(bx + hw, plinth + 10.05f + i * 0.55f, bz - 7.2f), Pal.Stone, false);
             }
-            _ctx.Text("BANCA", new Vector3(bx, plinth + 8.35f, bz - 10f), 180f, 0.16f, Pal.BankGold, 0.08f);
+            _ctx.Text("BANK", new Vector3(bx, plinth + 8.35f, bz - 10f), 180f, 0.16f, Pal.BankGold, 0.08f);
             // Uffici sopra il salone (pieni).
             var upper = BuildingSpec.Make(17f, 12f, 12.4f, Pal.Stone, Pal.GlassBlue);
             upper.Style = FacadeStyle.Pilasters;
@@ -428,8 +428,8 @@ namespace Underworld.World.Areas
             var door = new Vector3(bx - 2.6f, floor + 1.3f, bz + vz0 - 0.55f);
             _ctx.Box(door, new Vector3(2.6f, 2.6f, 0.5f), Pal.VaultSteel, 10f, true, BoxFaces.All);
             _ctx.Box(door + new Vector3(0f, 0f, -0.27f), new Vector3(1.2f, 1.2f, 0.06f), Pal.Chrome, 10f, false, BoxFaces.All);
-            _ctx.Text("CAVEAU", new Vector3(bx, floor + 3.2f, bz + vz0), 180f, 0.08f, Pal.BeaconRed, 0.04f);
-            _ctx.Text("SPORTELLI", new Vector3(bx, floor + 5f, bz + vz0), 180f, 0.09f, Pal.BankGold, 0.04f);
+            _ctx.Text("VAULT", new Vector3(bx, floor + 3.2f, bz + vz0), 180f, 0.08f, Pal.BeaconRed, 0.04f);
+            _ctx.Text("TELLERS", new Vector3(bx, floor + 5f, bz + vz0), 180f, 0.09f, Pal.BankGold, 0.04f);
             for (int k = 0; k < 4; k++)
             {
                 float x = bx - 7.6f + k * 0.9f;
@@ -511,13 +511,13 @@ namespace Underworld.World.Areas
             // Fascia blu e pensilina dell'ingresso con la scritta POLIZIA.
             _ctx.Box(new Vector3(bc.x, Sw + 3.5f, c.z), new Vector3(spec.Width + 0.2f, 0.7f, spec.Depth + 0.2f), Pal.PoliceBlue, 0f, false, BoxFaces.All);
             _ctx.BoxMinMax(new Vector3(face, Sw + 3.0f, c.z - 3.2f), new Vector3(face + 2.6f, Sw + 3.4f, c.z + 3.2f), Pal.PoliceBlue, false, BoxFaces.All);
-            _ctx.Text("POLIZIA", new Vector3(face + 2.6f, Sw + 3.2f, c.z), 90f, 0.045f, Pal.SignWhite, 0.03f);
+            _ctx.Text("POLICE", new Vector3(face + 2.6f, Sw + 3.2f, c.z), 90f, 0.045f, Pal.SignWhite, 0.03f);
             foreach (float s in new[] { -1f, 1f })
             {
                 _ctx.Box(new Vector3(face + 2.3f, Sw + 3.55f, c.z + s * 2.8f), new Vector3(0.3f, 0.3f, 0.3f), s < 0 ? Pal.BeaconRed : Pal.SignBlue, 0f, false);
                 _ctx.Box(new Vector3(face + 2.4f, Sw + 1.5f, c.z + s * 3f), new Vector3(0.2f, 3f, 0.2f), Pal.MetalDark, 0f, true);
             }
-            _ctx.Sign("POLIZIA", new Vector3(face + 0.1f, Sw + 8.2f, c.z), 90f, 0.2f, Pal.PoliceBlue, Pal.SignWhite);
+            _ctx.Sign("POLICE", new Vector3(face + 0.1f, Sw + 8.2f, c.z), 90f, 0.2f, Pal.PoliceBlue, Pal.SignWhite);
             // Porta (incassata, scura) e gradino.
             _ctx.Box(new Vector3(face + 0.05f, Sw + 1.3f, c.z), new Vector3(0.12f, 2.6f, 2.4f), Pal.GlassDark, 0f, false, BoxFaces.All);
             // Asta della bandiera.
@@ -570,7 +570,7 @@ namespace Underworld.World.Areas
             };
             float floor = _ctx.Room(min, max, Sw, h, 0.3f, Pal.White, Pal.Marble, Pal.RoofLight, openings);
             _ctx.WrapBand(min, max, Sw + h - 0.6f, Sw + h + 0.35f, 0.12f, Pal.SignBlue);
-            _ctx.Sign("AUTOSALONE", new Vector3(min.x - 0.12f, Sw + 5.75f, c.z), 270f, 0.11f, Pal.Black, Pal.SignWhite, 0.2f);
+            _ctx.Sign("DEALERSHIP", new Vector3(min.x - 0.12f, Sw + 5.75f, c.z), 270f, 0.11f, Pal.Black, Pal.SignWhite, 0.2f);
 
             // Pedane per le auto in mostra (le mette il modulo Veicoli sui punti display.0..3).
             var pods = new[] { new Vector2(-5.8f, -6.2f), new Vector2(-5.8f, 6.2f), new Vector2(0.6f, -6.2f), new Vector2(0.6f, 6.2f) };
@@ -586,7 +586,7 @@ namespace Underworld.World.Areas
             _ctx.Box(desk + Vector3.up * 0.55f, new Vector3(0.9f, 1.1f, 3.2f), Pal.White);
             _ctx.Box(desk + new Vector3(0f, 1.13f, 0f), new Vector3(1.0f, 0.06f, 3.3f), Pal.Black, 0f, false, BoxFaces.All);
             _ctx.Box(desk + new Vector3(0.1f, 1.45f, 0.6f), new Vector3(0.06f, 0.5f, 0.8f), Pal.ScreenBlue, 0f, false, BoxFaces.All);
-            _ctx.Text("VENDITA", new Vector3(max.x - 0.3f, floor + 3.6f, c.z), 270f, 0.08f, Pal.SignBlue, 0.04f);
+            _ctx.Text("SALES", new Vector3(max.x - 0.3f, floor + 3.6f, c.z), 270f, 0.08f, Pal.SignBlue, 0.04f);
             _ctx.Anchor("dealership.main", AnchorKind.Dealership, desk + new Vector3(-2.2f, 0f, 0f), 90f, 2.5f);
             _ctx.Anchor("dealership.exit", AnchorKind.Dealership, new Vector3(c.x - 17f, 0f, c.z), 180f, 3f);
 
@@ -676,7 +676,7 @@ namespace Underworld.World.Areas
             };
             float floor = _ctx.Room(min, max, Sw, 5f, 0.3f, Pal.Facade3, Pal.FloorDark, Pal.RoofDark, openings);
             _ctx.Box(new Vector3(c.x, Sw + 3.75f, max.z + 0.7f), new Vector3(15.6f, 0.08f, 1.5f), Pal.Black, Quaternion.Euler(15f, 0f, 0f), false, BoxFaces.All);
-            _ctx.Sign("MODA", new Vector3(c.x, Sw + 4.45f, max.z + 0.12f), 0f, 0.11f, Pal.Black, Pal.SignYellow, 0.2f);
+            _ctx.Sign("FASHION", new Vector3(c.x, Sw + 4.45f, max.z + 0.12f), 0f, 0.11f, Pal.Black, Pal.SignYellow, 0.2f);
 
             // Manichini in vetrina, stender con vestiti colorati, specchi, cassa.
             foreach (float sx in new[] { -5f, 5f })
@@ -750,7 +750,7 @@ namespace Underworld.World.Areas
             _ctx.Anchor("garage.public", AnchorKind.Garage, machine + new Vector3(1.3f, 0f, 0f), 270f, 2.5f);
             var pole = new Vector3(c.x - 4.6f, Sw, z0 - 0.6f);
             _ctx.Box(pole + Vector3.up * 2.2f, new Vector3(0.2f, 4.4f, 0.2f), Pal.MetalDark);
-            _ctx.Sign("PARCHEGGIO", pole + new Vector3(0f, 4.6f, -0.2f), 180f, 0.09f, Pal.AwningBlue, Pal.SignWhite, 0.18f);
+            _ctx.Sign("PARKING", pole + new Vector3(0f, 4.6f, -0.2f), 180f, 0.09f, Pal.AwningBlue, Pal.SignWhite, 0.18f);
             _ctx.Text("P", pole + new Vector3(0f, 3.4f, -0.12f), 180f, 0.12f, Pal.SignBlue, 0.04f);
             foreach (var lp in new[] { new Vector3(x0 + 0.8f, Sw, c.z), new Vector3(x1 - 0.8f, Sw, c.z) })
                 _ctx.Lamp(lp, lp.x < c.x ? 90f : 270f);
@@ -1071,9 +1071,9 @@ namespace Underworld.World.Areas
 
         void Exits()
         {
-            var north = _ctx.Gateway(new Vector3(ExitNorthX, 0f, Edge), Side.North, Road, "PERIFERIA");
-            var east = _ctx.Gateway(new Vector3(Edge, 0f, ExitEastZ), Side.East, Road, "INDUSTRIA");
-            var south = _ctx.Gateway(new Vector3(ExitSouthX, 0f, -Edge), Side.South, Road, "CAMPAGNA");
+            var north = _ctx.Gateway(new Vector3(ExitNorthX, 0f, Edge), Side.North, Road, "SUBURBS");
+            var east = _ctx.Gateway(new Vector3(Edge, 0f, ExitEastZ), Side.East, Road, "INDUSTRIAL");
+            var south = _ctx.Gateway(new Vector3(ExitSouthX, 0f, -Edge), Side.South, Road, "OUTSKIRTS");
             _ctx.Anchor("exit.suburbs", AnchorKind.Exit, north, 0f, 5f, nameof(AreaId.Suburbs));
             _ctx.Anchor("exit.industrial", AnchorKind.Exit, east, 90f, 5f, nameof(AreaId.Industrial));
             _ctx.Anchor("exit.outskirts", AnchorKind.Exit, south, 180f, 5f, nameof(AreaId.Outskirts));
@@ -1083,9 +1083,9 @@ namespace Underworld.World.Areas
             _ctx.Anchor("arrival.from_outskirts", AnchorKind.Arrival, new Vector3(ExitSouthX - 3f, 0f, -120f), 0f, 3f, nameof(AreaId.Outskirts));
 
             // Cartelli stradali che indicano le uscite dalla piazza.
-            _ctx.Sign("PERIFERIA ^", new Vector3(-26.2f, 4.2f, 26.2f), 180f, 0.07f, Pal.AwningGreen, Pal.SignWhite, 0.15f);
-            _ctx.Sign("INDUSTRIA ^", new Vector3(26.2f, 4.2f, 13.8f), 270f, 0.07f, Pal.AwningGreen, Pal.SignWhite, 0.15f);
-            _ctx.Sign("CAMPAGNA ^", new Vector3(26.2f, 4.2f, -26.2f), 0f, 0.07f, Pal.AwningGreen, Pal.SignWhite, 0.15f);
+            _ctx.Sign("SUBURBS ^", new Vector3(-26.2f, 4.2f, 26.2f), 180f, 0.07f, Pal.AwningGreen, Pal.SignWhite, 0.15f);
+            _ctx.Sign("INDUSTRIAL ^", new Vector3(26.2f, 4.2f, 13.8f), 270f, 0.07f, Pal.AwningGreen, Pal.SignWhite, 0.15f);
+            _ctx.Sign("OUTSKIRTS ^", new Vector3(26.2f, 4.2f, -26.2f), 0f, 0.07f, Pal.AwningGreen, Pal.SignWhite, 0.15f);
             foreach (var p in new[] { new Vector3(-26.2f, Sw, 26.2f), new Vector3(26.2f, Sw, 13.8f), new Vector3(26.2f, Sw, -26.2f) })
                 _ctx.Box(p + Vector3.up * 1.9f, new Vector3(0.14f, 3.8f, 0.14f), Pal.MetalDark);
 

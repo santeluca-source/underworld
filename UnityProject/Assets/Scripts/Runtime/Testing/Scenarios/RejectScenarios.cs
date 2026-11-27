@@ -27,14 +27,14 @@ namespace Underworld.Testing.Scenarios
             bool textOk = !string.IsNullOrEmpty(launcher.StatusText) &&
                           (prefix == null || launcher.StatusText.StartsWith(prefix)) &&
                           launcher.StatusText.IndexOf('|') < 0;
-            ctx.Check("il client mostra il motivo in italiano", textOk, launcher.StatusText);
+            ctx.Check("il client mostra il motivo in inglese", textOk, launcher.StatusText);
         }
 
-        /// <summary>Inizio del testo in italiano atteso per alcuni codici.</summary>
+        /// <summary>Inizio del testo in inglese atteso per alcuni codici.</summary>
         static string ExpectedTextPrefix(string code)
         {
-            if (code == DisconnectReasons.NameInvalidCode) return "Nome non valido";
-            if (code == DisconnectReasons.ServerFullCode) return "Server pieno";
+            if (code == DisconnectReasons.NameInvalidCode) return "Invalid name";
+            if (code == DisconnectReasons.ServerFullCode) return "Server is full";
             return null;
         }
     }

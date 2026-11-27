@@ -124,7 +124,7 @@ namespace Underworld.Tests
             var r = ConnectionApprovalRules.Evaluate(Good("x").ToBytes(), 1, Ctx());
             Assert.AreEqual(DisconnectReasons.NameInvalidCode, Code(r));
             DisconnectReasons.TryParse(r.Reason, out _, out string text);
-            StringAssert.StartsWith("Nome non valido", text);
+            StringAssert.StartsWith("Invalid name", text);
         }
 
         [Test]
@@ -133,7 +133,7 @@ namespace Underworld.Tests
             var r = ConnectionApprovalRules.Evaluate(Good().ToBytes(), 3, Ctx(current: 2, max: 2));
             Assert.AreEqual(DisconnectReasons.ServerFullCode, Code(r));
             DisconnectReasons.TryParse(r.Reason, out _, out string text);
-            StringAssert.StartsWith("Server pieno", text);
+            StringAssert.StartsWith("Server is full", text);
         }
 
         [Test]
@@ -146,7 +146,7 @@ namespace Underworld.Tests
         sealed class Banned : IConnectionValidator
         {
             public string Validate(in ConnectionCandidate c) =>
-                c.Name == "Cattivo" ? DisconnectReasons.Format("banned", "Sei stato bandito.") : null;
+                c.Name == "Cattivo" ? DisconnectReasons.Format("banned", "You are banned.") : null;
         }
 
         [Test]

@@ -13,7 +13,7 @@ namespace Underworld.Net
         public const int MaxLength = 16;
 
         /// <summary>Testo da mostrare quando il nome non va bene.</summary>
-        public const string RuleText = "usa da 3 a 16 caratteri (lettere, numeri, spazio, _ e -)";
+        public const string RuleText = "use 3 to 16 characters (letters, numbers, space, _ and -)";
 
         /// <summary>Toglie gli spazi ai bordi e unisce gli spazi ripetuti. Null diventa stringa vuota.</summary>
         public static string Normalize(string raw)

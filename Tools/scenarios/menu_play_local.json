@@ -1,0 +1,16 @@
+{
+  "description": "Client con grafica senza -connect: menu principale vero (screenshot), nome nel campo, clic su Play, GameLauncher.PlayLocal avvia il server figlio Downtown, caricamento (screenshot), InGame con HUD in Area_Downtown (screenshot). Il server figlio deve chiudersi entro 10 s dalla chiusura del client.",
+  "timeoutSec": 150,
+  "servers": [],
+  "clients": [
+    {
+      "name": "MenuTester",
+      "autotest": "menu_play_local.client",
+      "graphics": true,
+      "server": -1,
+      "args": ["-localport", "{port:5}", "-localdatadir", "{tmp}/localserver", "-shots", "{tmp}/shots"]
+    }
+  ],
+  "checkChildExit": { "client": "MenuTester", "withinSec": 10 },
+  "extraLogs": ["{tmp}/localserver/server.log"]
+}

@@ -37,7 +37,8 @@ namespace Underworld.Tests
         public void Resolve_GameSceneWithoutLauncherShowsHud()
         {
             Assert.AreEqual(UiMode.Hud, UiModeRules.Resolve("Area_TestGround", null));
-            Assert.AreEqual(UiMode.Hud, UiModeRules.Resolve("Downtown_Test", null));
+            Assert.AreEqual(UiMode.Hud, UiModeRules.Resolve("Area_Downtown", null));
+            Assert.AreEqual(UiMode.None, UiModeRules.Resolve("Downtown_Test", null)); // vecchia scena tolta
             Assert.AreEqual(UiMode.None, UiModeRules.Resolve("Bootstrap", null));
             Assert.AreEqual(UiMode.None, UiModeRules.Resolve("Bootstrap", LauncherState.Idle));
         }

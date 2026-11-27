@@ -50,31 +50,31 @@ namespace Underworld.Net
         // ---- Motivi pronti ----
 
         public static string ProtocolVersion(int client, int server) => Format(ProtocolVersionCode,
-            $"Versione del gioco diversa dal server (tua v{client}, server v{server}). Aggiorna il gioco.");
+            $"Your game version does not match the server (you v{client}, server v{server}). Please update the game.");
 
         public static string PayloadTooLarge(int bytes, int max) => Format(PayloadTooLargeCode,
-            $"Dati di connessione troppo grandi ({bytes} byte, massimo {max}).");
+            $"Connection data is too large ({bytes} bytes, max {max}).");
 
-        public static readonly string PayloadInvalid = Format(PayloadInvalidCode, "Dati di connessione non validi.");
+        public static readonly string PayloadInvalid = Format(PayloadInvalidCode, "Invalid connection data.");
 
-        public static readonly string IdentityInvalid = Format(IdentityInvalidCode, "Identità del giocatore non valida.");
+        public static readonly string IdentityInvalid = Format(IdentityInvalidCode, "Invalid player identity.");
 
-        public static readonly string NameInvalid = Format(NameInvalidCode, "Nome non valido: " + PlayerNameRules.RuleText + ".");
+        public static readonly string NameInvalid = Format(NameInvalidCode, "Invalid name: " + PlayerNameRules.RuleText + ".");
 
         public static string ServerFull(int current, int max) => Format(ServerFullCode,
-            $"Server pieno ({current}/{max}). Riprova più tardi.");
+            $"Server is full ({current}/{max}). Try again later.");
 
         public static readonly string AlreadyConnected = Format(AlreadyConnectedCode,
-            "Questo giocatore è già collegato al server.");
+            "This player is already connected to the server.");
 
         public static readonly string ServerStarting = Format(ServerStartingCode,
-            "Il server si sta avviando. Riprova tra poco.");
+            "The server is starting. Try again in a moment.");
 
-        public static readonly string ServerClosing = Format(ServerClosingCode, "Il server si è chiuso.");
+        public static readonly string ServerClosing = Format(ServerClosingCode, "The server has closed.");
 
         public static readonly string MovementKick = Format(MovementKickCode,
-            "Disconnesso dal server: movimento non valido.");
+            "Disconnected from the server: invalid movement.");
 
-        public static readonly string InternalError = Format(InternalErrorCode, "Errore interno del server.");
+        public static readonly string InternalError = Format(InternalErrorCode, "Internal server error.");
     }
 }

@@ -108,7 +108,7 @@ namespace Underworld.Net
                     yield break;
                 }
                 Debug.LogWarning($"{NetConstants.ClientLog} Indirizzo -connect non valido: '{args.ConnectAddress}' (formato ip:porta).");
-                Launcher.ReportFailure($"Indirizzo non valido: {args.ConnectAddress}. Usa il formato ip:porta.");
+                Launcher.ReportFailure($"Invalid address: {args.ConnectAddress}. Use the format ip:port.");
             }
 
             LoadMainMenuIfPresent();

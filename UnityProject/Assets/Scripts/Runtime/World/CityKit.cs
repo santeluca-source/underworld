@@ -392,7 +392,9 @@ namespace Underworld.World
             ctx.Box(mouth + Vector3.up * 10.5f, new Vector3(half * 2f + 4.2f, 3f, 2.4f), Pal.StoneDark, rot, false, BoxFaces.All);
             ctx.Box(mouth + Vector3.up * 12.3f, new Vector3(half * 2f + 5f, 0.6f, 3f), Pal.Stone, rot, false, BoxFaces.All);
             // Insegna verso la città (si legge da dentro la mappa).
-            ctx.Sign(label, mouth + Vector3.up * 10.5f - f * 1.32f, yaw + 180f, 0.32f, Pal.PoliceBlue, Pal.SignWhite, 0.2f);
+            // Scritte lunghe (es. INDUSTRIAL) si rimpiccioliscono: l'insegna resta dentro i pilastri.
+            float px = Mathf.Min(0.32f, (half * 2f + 1.6f) / Mathf.Max(1, PixelFont.Width(label)));
+            ctx.Sign(label, mouth + Vector3.up * 10.5f - f * 1.32f, yaw + 180f, px, Pal.PoliceBlue, Pal.SignWhite, 0.2f);
             // Fasce luminose sui pilastri (l'uscita è più luminosa dei lati).
             foreach (float s in new[] { -1f, 1f })
                 ctx.Box(mouth + r * (s * (half + 1.1f)) + Vector3.up * 4.5f - f * 1.32f, new Vector3(0.5f, 6f, 0.06f), Pal.SignYellow, rot, false, BoxFaces.All);

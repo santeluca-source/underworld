@@ -9,31 +9,32 @@ namespace Underworld.Tests
         [TestCase(0L, "0")]
         [TestCase(7L, "7")]
         [TestCase(999L, "999")]
-        [TestCase(1000L, "1.000")]
-        [TestCase(12500L, "12.500")]
-        [TestCase(1234567L, "1.234.567")]
-        [TestCase(-5000L, "-5.000")]
+        [TestCase(1000L, "1,000")]
+        [TestCase(12500L, "12,500")]
+        [TestCase(1234567L, "1,234,567")]
+        [TestCase(-5000L, "-5,000")]
         [TestCase(-999L, "-999")]
-        [TestCase(long.MaxValue, "9.223.372.036.854.775.807")]
-        [TestCase(long.MinValue, "-9.223.372.036.854.775.808")]
-        public void Thousands_UsesItalianDots(long value, string expected)
+        [TestCase(long.MaxValue, "9,223,372,036,854,775,807")]
+        [TestCase(long.MinValue, "-9,223,372,036,854,775,808")]
+        public void Thousands_UsesEnglishCommas(long value, string expected)
         {
             Assert.AreEqual(expected, UiFormat.Thousands(value));
         }
 
         [Test]
-        public void Money_PutsCurrencyAfterNumber()
+        public void Money_PutsCurrencyBeforeNumber()
         {
-            Assert.AreEqual("12.500 $", UiFormat.Money(12500));
-            Assert.AreEqual("0 $", UiFormat.Money(0));
+            Assert.AreEqual("$12,500", UiFormat.Money(12500));
+            Assert.AreEqual("$0", UiFormat.Money(0));
+            Assert.AreEqual("-$300", UiFormat.Money(-300));
         }
 
         [Test]
         public void MoneyDelta_HasSign()
         {
-            Assert.AreEqual("+2.500 $", UiFormat.MoneyDelta(2500));
-            Assert.AreEqual("-300 $", UiFormat.MoneyDelta(-300));
-            Assert.AreEqual("0 $", UiFormat.MoneyDelta(0));
+            Assert.AreEqual("+$2,500", UiFormat.MoneyDelta(2500));
+            Assert.AreEqual("-$300", UiFormat.MoneyDelta(-300));
+            Assert.AreEqual("$0", UiFormat.MoneyDelta(0));
         }
 
         [TestCase("Ada", NameCheck.Ok)]
