@@ -205,7 +205,7 @@ Note della traccia NET (rete, giocatore, test automatici = Fase 4). Scritte il 2
 - `RateLimiter` (secchio di gettoni per client e chiave) pronto per le RPC dei moduli.
 
 ### Test automatici (sezione 12)
-- `Tools/test.ps1 -Scenario <nome>|all [-PortBase 7700] [-SkipBuild] [-TimeoutSec n] [-Exe percorso]` (PowerShell 5.1). Senza `-SkipBuild` fa prima la build.
+- `Tools/test.ps1 -Scenario <nome>|all [-PortBase 7700] [-SkipBuild] [-TimeoutSec n] [-Exe percorso] [-Repeat n]` (PowerShell 5.1). Senza `-SkipBuild` fa prima la build.
 - Ogni scenario usa 10 porte (`PortBase + 10 × indice`), cartelle temporanee in `%TEMP%\underworld-tests\<data>\<scenario>` (log, risultati, profili, dati del server). I log restano per controllarli.
 - Scenari: `connect_two_clients`, `reject_bad_name`, `server_full`, `speed_hack_corrected`, `local_play_launcher`, `bot_wander` (4 bot insieme, nessuna correzione).
 - Nel gioco: `[AutoTestScenario("<scenario>.<ruolo>")]` + `IAutoTestScenario` in `Runtime/Testing/Scenarios/`. `AutoTestContext`: `Check`, `WaitUntil`, `Wait`, `WaitForLocalPlayer`, `WaitForRelease`, `Log`, `SetData`, `LocalPlayer`, `Bot`, `Launcher`, `Server`.
@@ -213,6 +213,7 @@ Note della traccia NET (rete, giocatore, test automatici = Fase 4). Scritte il 2
 - Il trucco di velocità (`ThirdPersonController.DebugSpeedMultiplier`) è `internal` e lo usa solo lo scenario `speed_hack_corrected`.
 
 ### Problemi noti
-- Una volta (su circa 15 avvii) i due client di `bot_wander`, entrati insieme, hanno visto il loro personaggio in (0,0,0) e tutti i processi si sono bloccati. Ipotesi: stato iniziale vuoto del `NetworkTransform` con autorità del proprietario + due `CharacterController` sovrapposti. Correzioni: un solo `CharacterController` acceso per processo e controllo della posizione di spawn sul proprietario. Dopo le correzioni il problema non si è ripetuto, ma la correzione della posizione non è mai scattata nei test: la causa non è provata.
+- RISOLTO (2026-11-27): personaggio locale in (0,0,0) dopo lo spawn (raro, circa 1 su 15 in `bot_wander`). Causa provata: Netcode crea il prefab in (0,0,0) e poi sposta il transform; il progetto ha `Physics.autoSyncTransforms` spento, quindi la capsula del `CharacterController` resta in (0,0,0) fino al prossimo passo di fisica. Se il primo `Move` arriva prima di un FixedUpdate (frame veloci in batchmode), il personaggio torna in (0,0,0). Il `NetworkTransform` non c'entra. Correzione: `ThirdPersonController.SyncCharacterController(cc)` (spegne e riaccende il controller) allo spawn e prima di accendere i comandi. Regola: dopo ogni spostamento diretto del transform di un personaggio, risincronizza il `CharacterController` (o spegnilo durante lo spostamento). Test: `PlayerSpawnSyncTests` (EditMode, riproduce la causa) e i controlli "partenza dal punto di spawn" / "nessun salto di posizione" di `bot_wander`; `Tools/test.ps1 -Repeat N` ripete gli scenari per i problemi rari.
+- Il blocco di tutti i processi visto insieme al caso (0,0,0) il 2026-11-26 alle 21:36 coincide con l'intervallo in cui uno script esterno chiudeva tutti gli `UNDERWORLD.exe` del PC (21:00-21:40): i log finiscono nello stesso secondo. Non si è più visto.
 - Il controllo di velocità lascia passare circa 1 s di trucco (credito di 14 m) prima di correggere. Da stringere in Fase 12 se serve.
 - `AreaAnchor` è stato spostato nel file `Runtime/Core/AreaAnchor.cs` (stessi membri): nel file `AreaAnchors.cs` Unity non lo salvava nelle scene ("script mancante").

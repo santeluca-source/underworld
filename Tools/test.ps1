@@ -28,13 +28,16 @@
 .EXAMPLE
   powershell -NoProfile -ExecutionPolicy Bypass -File Tools/test.ps1 -Scenario all
   powershell -NoProfile -ExecutionPolicy Bypass -File Tools/test.ps1 -Scenario connect_two_clients -SkipBuild
+  powershell -NoProfile -ExecutionPolicy Bypass -File Tools/test.ps1 -Scenario bot_wander -SkipBuild -Repeat 10
+  (-Repeat N: ripete N volte la lista di scenari, per i problemi rari; ogni giro ha la sua cartella r<N>)
 #>
 param(
     [string]$Scenario = "all",
     [int]$PortBase = 7700,
     [switch]$SkipBuild,
     [int]$TimeoutSec = 0,
-    [string]$Exe
+    [string]$Exe,
+    [int]$Repeat = 1
 )
 
 $ErrorActionPreference = "Stop"
@@ -338,11 +341,19 @@ New-Item -ItemType Directory -Force $runDir | Out-Null
 $all = @()
 $anyFail = $false
 try {
-    for ($k = 0; $k -lt $files.Count; $k++) {
-        $res = Invoke-Scenario $files[$k] $k $runDir
-        $all += $res.Rows
-        if ($res.Failed) { $anyFail = $true }
-        Write-Host ("    -> {0}: {1}" -f $res.Name, $(if ($res.Failed) { "FAIL" } else { "PASS" }))
+    if ($Repeat -lt 1) { $Repeat = 1 }
+    for ($r = 1; $r -le $Repeat; $r++) {
+        # Ogni giro in una sua cartella; le porte si riusano (i processi del giro prima sono già chiusi).
+        $iterDir = if ($Repeat -gt 1) { Join-Path $runDir ("r" + $r) } else { $runDir }
+        New-Item -ItemType Directory -Force $iterDir | Out-Null
+        for ($k = 0; $k -lt $files.Count; $k++) {
+            $res = Invoke-Scenario $files[$k] $k $iterDir
+            if ($Repeat -gt 1) { foreach ($row in $res.Rows) { $row.Scenario = "$($row.Scenario) #$r" } }
+            $all += $res.Rows
+            if ($res.Failed) { $anyFail = $true }
+            $label = if ($Repeat -gt 1) { "$($res.Name) #$r" } else { $res.Name }
+            Write-Host ("    -> {0}: {1}" -f $label, $(if ($res.Failed) { "FAIL" } else { "PASS" }))
+        }
     }
 } finally {
     foreach ($p in $script:AllProcs) { Stop-Proc $p }
