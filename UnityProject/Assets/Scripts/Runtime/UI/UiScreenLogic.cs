@@ -45,7 +45,9 @@ namespace Underworld.UI
             if (state == LauncherState.InGame) return UiMode.Hud;
             if (activeScene == MenuScene) return UiMode.Menu;
             if (state.HasValue && (IsBusy(state.Value) || state.Value == LauncherState.Failed)) return UiMode.Loading;
-            if (IsGameScene(activeScene)) return UiMode.Hud;
+            // In un'area senza partita (es. "Cancel" mentre Netcode caricava l'area): niente HUD, solo attesa
+            // finché il launcher torna al menu. Senza launcher (scena aperta a mano nell'editor) resta l'HUD.
+            if (IsGameScene(activeScene)) return state.HasValue ? UiMode.Loading : UiMode.Hud;
             return UiMode.None;
         }
     }

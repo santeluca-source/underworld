@@ -2,10 +2,13 @@ using System;
 using System.Collections;
 using System.Diagnostics;
 using System.IO;
+using System.Text;
+using System.Text.RegularExpressions;
 using Underworld.Core;
 using Underworld.Player;
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using Debug = UnityEngine.Debug;
 
 namespace Underworld.Net
@@ -16,13 +19,14 @@ namespace Underworld.Net
     /// - HostForFriends: come PlayLocal, ma il server ascolta su tutta la rete di casa (0.0.0.0).
     /// - Join: si collega a un server esistente.
     /// - Disconnect: esce dalla partita e torna al menu. QuitGame: chiude il gioco.
-    /// I server figli si chiudono da soli quando questo processo esce (-parentPid).
+    /// I server figli si chiudono quando il launcher sparisce (uscita dal gioco, fine del Play nell'editor:
+    /// file server.stop, poi Kill) e, come rete di sicurezza, quando questo processo esce (-parentPid).
     /// Argomenti per i test: -localport, -localdatadir, -localarea.
     /// </summary>
     public sealed class GameLauncher : MonoBehaviour, IGameLauncher
     {
         /// <summary>Nome usato quando il giocatore non ne ha scelto uno.</summary>
-        public const string DefaultPlayerName = "Giocatore";
+        public const string DefaultPlayerName = "Player";
 
         /// <summary>Tempo massimo per avviare il server locale e collegarsi (s).</summary>
         public const float LocalConnectTimeout = 25f;
@@ -30,6 +34,13 @@ namespace Underworld.Net
         public const float JoinTimeout = 15f;
         /// <summary>Tempo massimo tra connessione e personaggio pronto (s).</summary>
         public const float SpawnTimeout = 30f;
+        /// <summary>
+        /// Attesa massima (s) quando il server ha ancora la sessione vecchia di questo giocatore (crash e riavvio):
+        /// il server la chiude dopo il timeout del transport (30 s).
+        /// </summary>
+        public const float AlreadyConnectedGrace = 35f;
+        /// <summary>Lunghezza massima del testo di un motivo mandato dal server.</summary>
+        public const int MaxReasonLength = 200;
 
         public LauncherState State { get; private set; } = LauncherState.Idle;
         public string StatusText { get; private set; } = string.Empty;
@@ -37,8 +48,11 @@ namespace Underworld.Net
 
         /// <summary>Codice dell'ultimo motivo di rifiuto o disconnessione (DisconnectReasons), o null.</summary>
         public string LastReasonCode { get; private set; }
-        /// <summary>Testo in italiano dell'ultimo motivo di rifiuto o disconnessione, o null.</summary>
+        /// <summary>Testo (in inglese, ripulito) dell'ultimo motivo di rifiuto o disconnessione, o null.</summary>
         public string LastReasonText { get; private set; }
+
+        /// <summary>Vero se l'ultimo errore è una disconnessione durante la partita (il menu mostra "Disconnected").</summary>
+        public bool DisconnectedInGame { get; private set; }
 
         /// <summary>Pid del server figlio avviato da PlayLocal/HostForFriends (0 se non c'è).</summary>
         public int ChildServerPid
@@ -67,6 +81,8 @@ namespace Underworld.Net
         string _rawReason;
         bool _userDisconnect;
         string _inGameStatus;
+        /// <summary>"ip:porta" per gli amici quando questo PC ospita (null altrimenti).</summary>
+        string _hostAddress;
 
         internal void Init(NetworkManager nm, UnderworldTransport transport)
         {
@@ -75,6 +91,10 @@ namespace Underworld.Net
             _nm.OnClientDisconnectCallback += OnClientDisconnect;
             _nm.OnClientStopped += OnClientStopped;
             PlayerNetwork.LocalPlayerSpawned += OnLocalPlayerSpawned;
+            SceneManager.activeSceneChanged += OnActiveSceneChanged;
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
+#endif
         }
 
         void OnDestroy()
@@ -85,8 +105,24 @@ namespace Underworld.Net
                 _nm.OnClientStopped -= OnClientStopped;
             }
             PlayerNetwork.LocalPlayerSpawned -= OnLocalPlayerSpawned;
+            SceneManager.activeSceneChanged -= OnActiveSceneChanged;
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.playModeStateChanged -= OnPlayModeStateChanged;
+#endif
+            StopChildServerNow("launcher distrutto");
             _child?.Dispose();
+            _child = null;
         }
+
+        // Nell'editor il processo (Unity Editor) resta vivo dopo il Play: -parentPid non basta, il figlio va chiuso qui.
+        void OnApplicationQuit() => StopChildServerNow("chiusura del gioco");
+
+#if UNITY_EDITOR
+        void OnPlayModeStateChanged(UnityEditor.PlayModeStateChange change)
+        {
+            if (change == UnityEditor.PlayModeStateChange.ExitingPlayMode) StopChildServerNow("fine del Play nell'editor");
+        }
+#endif
 
         // ---------------- API (IGameLauncher) ----------------
 
@@ -106,7 +142,10 @@ namespace Underworld.Net
             _userDisconnect = true;
             if (_nm != null && _nm.IsListening) _nm.Shutdown();
             _clientRunning = false;
+            HudBus.SetHostAddress(null);
             SetState(LauncherState.Idle, "You left the game.");
+            // Se Netcode stava caricando l'area (Cancel durante la connessione), la scena attiva è ancora il menu:
+            // OnActiveSceneChanged riporta al menu quando l'area si attiva.
             GameRoot.LoadMainMenuIfPresent();
         }
 
@@ -114,7 +153,7 @@ namespace Underworld.Net
         {
             ShutdownForExit();
             Debug.Log($"{NetConstants.ClientLog} Chiusura del gioco.");
-            // I server figli vedono che questo processo è chiuso (-parentPid) e si chiudono da soli.
+            // OnApplicationQuit chiude il server figlio (e -parentPid lo chiude comunque).
             Application.Quit();
 #if UNITY_EDITOR
             UnityEditor.EditorApplication.isPlaying = false;
@@ -165,6 +204,7 @@ namespace Underworld.Net
         IEnumerator JoinFlow(string address, ushort port, string playerName)
         {
             _inGameStatus = $"Playing on {address}:{port}.";
+            _hostAddress = null;
             yield return ConnectWithRetry(address, port, playerName, Time.realtimeSinceStartup + JoinTimeout, null);
             _flow = null;
         }
@@ -182,6 +222,7 @@ namespace Underworld.Net
             ushort port = (ushort)Mathf.Clamp(args.GetInt("localport", AreaInfo.DefaultPort(area)), 1, 65535);
             string dataDir = args.Get("localdatadir");
             if (string.IsNullOrEmpty(dataDir)) dataDir = Path.Combine(Application.persistentDataPath, "LocalServer", area.ToString());
+            dataDir = TrimDirectory(dataDir);
             float deadline = Time.realtimeSinceStartup + LocalConnectTimeout;
 
             // Un server figlio già acceso con le stesse impostazioni si riusa (es. dopo "Esci dalla partita").
@@ -189,6 +230,8 @@ namespace Underworld.Net
             if (!reuse)
             {
                 yield return StopChildServer();
+                // Un server rimasto acceso da una sessione di prima (es. Play dell'editor interrotto) sulla stessa porta.
+                yield return StopOrphanServer(dataDir, port);
                 SetState(LauncherState.StartingServer, "Starting the server on your PC...");
                 if (!TryStartChildServer(area, port, dataDir, forFriends, out string error))
                 {
@@ -209,6 +252,7 @@ namespace Underworld.Net
             }
 
             string lan = forFriends ? LocalNetworkInfo.GetLanIPv4() : null;
+            _hostAddress = forFriends && lan != null ? $"{lan}:{port}" : null;
             _inGameStatus = forFriends
                 ? (lan != null
                     ? $"Server open to friends: {lan}:{port}. Open UDP port {port} on your router for friends outside your home."
@@ -227,6 +271,7 @@ namespace Underworld.Net
         {
             float wait = 0.5f;
             int attempt = 0;
+            bool graceGiven = false;
             while (true)
             {
                 attempt++;
@@ -256,7 +301,14 @@ namespace Underworld.Net
 
                 // Il client si è fermato: decidi se riprovare.
                 ParseReason(_rawReason, out string code, out string text);
-                bool retryable = code == null || code == DisconnectReasons.ServerStartingCode;
+                // already_connected: di solito è la sessione vecchia dopo un crash; il server la chiude dopo il timeout.
+                if (code == DisconnectReasons.AlreadyConnectedCode && !graceGiven)
+                {
+                    graceGiven = true;
+                    deadline = Mathf.Max(deadline, Time.realtimeSinceStartup + AlreadyConnectedGrace);
+                }
+                bool retryable = code == null || code == DisconnectReasons.ServerStartingCode ||
+                                 code == DisconnectReasons.AlreadyConnectedCode;
                 bool alive = serverAlive == null || serverAlive();
                 if (!retryable || !alive || Time.realtimeSinceStartup + wait > deadline)
                 {
@@ -268,6 +320,8 @@ namespace Underworld.Net
                     yield break;
                 }
                 Debug.Log($"{NetConstants.ClientLog} Connessione non riuscita ({code ?? "nessuna risposta"}): riprovo tra {wait:0.0} s.");
+                if (code == DisconnectReasons.AlreadyConnectedCode)
+                    SetState(LauncherState.Connecting, "Your last session is still open on the server. Waiting for it to close...");
                 yield return new WaitForSecondsRealtime(wait);
                 wait = Mathf.Min(wait * 2f, 3f);
                 // Aspetta che la rete sia ferma prima di riprovare.
@@ -290,6 +344,7 @@ namespace Underworld.Net
             _clientStoppedSignal = false;
             _rawReason = null;
             _userDisconnect = false;
+            DisconnectedInGame = false;
             LastReasonCode = null;
             LastReasonText = null;
             Debug.Log($"{NetConstants.ClientLog} Mi collego a {address}:{port} come '{playerName}' (giocatore {identity.PlayerId}).");
@@ -326,7 +381,10 @@ namespace Underworld.Net
                 // Disconnessione inattesa durante la partita: mostra il motivo e torna al menu.
                 LastReasonCode = code;
                 LastReasonText = text ?? "Lost connection to the server.";
-                Fail("Disconnected: " + LastReasonText);
+                HudBus.SetHostAddress(null);
+                DisconnectedInGame = true;
+                // Il titolo "Disconnected" lo mette il menu: qui solo il motivo.
+                Fail(LastReasonText);
                 GameRoot.LoadMainMenuIfPresent();
             }
         }
@@ -336,6 +394,30 @@ namespace Underworld.Net
             if (_nm == null || _nm.IsServer) return;
             SetState(LauncherState.InGame, _inGameStatus ?? "In game.");
             HudBus.SetArea(AreaInfo.DisplayName(GuessArea()));
+            // "Play with friends": l'indirizzo deve vedersi nel gioco (toast ora, menu di pausa sempre).
+            HudBus.SetHostAddress(_hostAddress);
+            if (_hostAddress != null) HudBus.Toast($"Friends can join at {_hostAddress}", ToastKind.Info);
+        }
+
+        /// <summary>
+        /// Un'area diventata attiva senza partita (Cancel mentre Netcode la caricava, errore durante il caricamento):
+        /// si torna al menu invece di restare in un mondo vuoto senza personaggio.
+        /// </summary>
+        void OnActiveSceneChanged(Scene from, Scene to)
+        {
+            bool isServer = (_nm != null && _nm.IsServer) || LaunchArgs.Current.IsServer;
+            bool connected = _nm != null && _nm.IsConnectedClient;
+            if (!ShouldLeaveArea(to.name, isServer, State, connected, _userDisconnect)) return;
+            Debug.Log($"{NetConstants.ClientLog} Area {to.name} caricata senza partita ({State}): torno al menu.");
+            GameRoot.LoadMainMenuIfPresent();
+        }
+
+        /// <summary>Regola di OnActiveSceneChanged (logica pura, testata in EditMode).</summary>
+        public static bool ShouldLeaveArea(string scene, bool isServer, LauncherState state, bool connected, bool userLeft)
+        {
+            if (isServer || string.IsNullOrEmpty(scene) || !scene.StartsWith("Area_", StringComparison.Ordinal)) return false;
+            if (state != LauncherState.Idle && state != LauncherState.Failed) return false;
+            return userLeft || !connected;
         }
 
         /// <summary>Area della scena attiva (Area_&lt;Id&gt;), per l'HUD.</summary>
@@ -356,10 +438,33 @@ namespace Underworld.Net
             // Netcode può mettere davanti il suo testo: cerco il nostro formato riga per riga.
             foreach (var line in raw.Split('\n'))
             {
-                if (DisconnectReasons.TryParse(line.Trim(), out code, out text)) return;
+                if (DisconnectReasons.TryParse(line.Trim(), out code, out text))
+                {
+                    text = CleanReasonText(text);
+                    return;
+                }
             }
             code = null;
             text = null;
+        }
+
+        /// <summary>
+        /// Il testo del server non è fidato: niente tag rich text (via i caratteri minore e maggiore), niente
+        /// caratteri di controllo, al massimo MaxReasonLength caratteri. null se resta vuoto.
+        /// </summary>
+        public static string CleanReasonText(string text)
+        {
+            if (string.IsNullOrEmpty(text)) return null;
+            var sb = new StringBuilder(Math.Min(text.Length, MaxReasonLength));
+            foreach (char c in text)
+            {
+                if (sb.Length >= MaxReasonLength) break;
+                if (c == '<' || c == '>') continue;
+                sb.Append(char.IsControl(c) ? ' ' : c);
+            }
+            string clean = sb.ToString().Trim();
+            if (sb.Length >= MaxReasonLength && clean.Length > 0) clean += "...";
+            return clean.Length == 0 ? null : clean;
         }
 
         // ---------------- Server figlio ----------------
@@ -388,7 +493,7 @@ namespace Underworld.Net
             string listen = forFriends ? "0.0.0.0" : "127.0.0.1";
             string log = ChildLogPath(dataDir);
             string arguments = $"-server -area {area} -port {port} -listen {listen} -parentPid {myPid} " +
-                               $"-datadir {Quote(dataDir)} -batchmode -nographics -logFile {Quote(log)}";
+                               $"-datadir {QuoteArg(dataDir)} -batchmode -nographics -logFile {QuoteArg(log)}";
             try
             {
                 var psi = new ProcessStartInfo(exe, arguments)
@@ -419,7 +524,45 @@ namespace Underworld.Net
 
         static string ChildLogPath(string dataDir) => Path.Combine(dataDir, "server.log");
 
-        static string Quote(string s) => s.IndexOf(' ') >= 0 ? "\"" + s + "\"" : s;
+        /// <summary>
+        /// Un argomento per la riga di comando di Windows (regole di CommandLineToArgvW): sempre tra virgolette,
+        /// le barre rovesciate prima di una virgoletta (o della virgoletta finale) raddoppiate, le virgolette interne
+        /// precedute da una barra. Così una cartella che finisce con la barra non diventa una virgoletta letterale.
+        /// </summary>
+        public static string QuoteArg(string s)
+        {
+            s ??= string.Empty;
+            var sb = new StringBuilder(s.Length + 2);
+            sb.Append('"');
+            int slashes = 0;
+            foreach (char c in s)
+            {
+                if (c == '\\') { slashes++; continue; }
+                if (c == '"')
+                {
+                    sb.Append('\\', slashes * 2 + 1);
+                    sb.Append('"');
+                }
+                else
+                {
+                    sb.Append('\\', slashes);
+                    sb.Append(c);
+                }
+                slashes = 0;
+            }
+            sb.Append('\\', slashes * 2);
+            sb.Append('"');
+            return sb.ToString();
+        }
+
+        /// <summary>Cartella senza separatori finali (C:\dati\ diventa C:\dati), tranne la radice ("C:\", "/").</summary>
+        public static string TrimDirectory(string dir)
+        {
+            if (string.IsNullOrEmpty(dir)) return dir;
+            string t = dir.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+            if (t.Length == 0 || t.EndsWith(":", StringComparison.Ordinal)) return dir;
+            return t;
+        }
 
         /// <summary>
         /// Exe del server: nella build è questo stesso exe; nell'editor la build in Builds/Windows (se c'è).
@@ -492,6 +635,104 @@ namespace Underworld.Net
                 try { _child.Kill(); }
                 catch (Exception) { /* già chiuso */ }
             }
+        }
+
+        /// <summary>
+        /// Chiude subito il server figlio (senza coroutine: OnDestroy, uscita, fine del Play nell'editor).
+        /// File server.stop, attesa breve, poi Kill.
+        /// </summary>
+        void StopChildServerNow(string why)
+        {
+            if (ChildServerPid == 0) return;
+            Debug.Log($"{NetConstants.ClientLog} Chiudo il server figlio (pid {ChildServerPid}): {why}.");
+            try
+            {
+                if (!string.IsNullOrEmpty(ChildServerDataDir))
+                    File.WriteAllText(Path.Combine(ChildServerDataDir, NetConstants.StopFileName), "stop");
+            }
+            catch (Exception) { /* si passa al Kill */ }
+            try
+            {
+                if (!_child.WaitForExit(3000)) _child.Kill();
+            }
+            catch (Exception) { /* già chiuso */ }
+        }
+
+        /// <summary>
+        /// Server rimasto acceso da prima nella stessa cartella dati e sulla stessa porta (il suo server.ready
+        /// dice pid e porta): lo chiude (server.stop, poi Kill) prima di avviarne uno nuovo.
+        /// Tocca solo un processo con lo stesso nome dell'exe del server.
+        /// </summary>
+        IEnumerator StopOrphanServer(string dataDir, ushort port)
+        {
+            string readyFile = Path.Combine(dataDir, NetConstants.ReadyFileName);
+            if (!TryReadReadyFile(readyFile, out int pid, out int readyPort) || readyPort != port) yield break;
+            Process orphan = null;
+            try
+            {
+                orphan = Process.GetProcessById(pid);
+                string exe = ResolveServerExe(out _);
+                string expected = exe != null ? Path.GetFileNameWithoutExtension(exe) : "UNDERWORLD";
+                if (orphan.HasExited || !string.Equals(orphan.ProcessName, expected, StringComparison.OrdinalIgnoreCase))
+                {
+                    orphan.Dispose();
+                    yield break;
+                }
+            }
+            catch (Exception)
+            {
+                orphan?.Dispose();
+                yield break; // nessun processo con quel pid
+            }
+
+            Debug.Log($"{NetConstants.ClientLog} Trovato un server di prima ancora acceso (pid {pid}, porta {port}): lo chiudo.");
+            try { File.WriteAllText(Path.Combine(dataDir, NetConstants.StopFileName), "stop"); }
+            catch (Exception) { /* si passa al Kill */ }
+            float until = Time.realtimeSinceStartup + 5f;
+            while (Time.realtimeSinceStartup < until && !HasExitedSafe(orphan)) yield return new WaitForSecondsRealtime(0.2f);
+            try
+            {
+                if (!orphan.HasExited)
+                {
+                    orphan.Kill();
+                    orphan.WaitForExit(2000);
+                }
+            }
+            catch (Exception) { /* già chiuso */ }
+            orphan.Dispose();
+        }
+
+        static bool HasExitedSafe(Process p)
+        {
+            try { return p.HasExited; }
+            catch (Exception) { return true; }
+        }
+
+        /// <summary>Legge pid e porta da server.ready (formato scritto da ServerRuntime).</summary>
+        public static bool TryReadReadyFile(string path, out int pid, out int port)
+        {
+            pid = 0;
+            port = 0;
+            try
+            {
+                if (!File.Exists(path)) return false;
+                return TryParseReady(File.ReadAllText(path), out pid, out port);
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        public static bool TryParseReady(string json, out int pid, out int port)
+        {
+            pid = 0;
+            port = 0;
+            if (string.IsNullOrEmpty(json)) return false;
+            var mp = Regex.Match(json, "\"pid\"\\s*:\\s*(\\d+)");
+            var mo = Regex.Match(json, "\"port\"\\s*:\\s*(\\d+)");
+            return mp.Success && mo.Success && int.TryParse(mp.Groups[1].Value, out pid) &&
+                   int.TryParse(mo.Groups[1].Value, out port) && pid > 0;
         }
 
         // ---------------- Stato ----------------

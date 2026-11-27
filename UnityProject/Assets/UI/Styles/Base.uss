@@ -59,7 +59,7 @@
 }
 
 .uw-small {
-    font-size: var(--uw-type-14);
+    font-size: var(--uw-type-16);
 }
 
 .uw-tabular {
@@ -199,7 +199,7 @@
 
 .uw-btn__desc {
     margin-top: 2px;
-    font-size: var(--uw-type-14);
+    font-size: var(--uw-type-16);
     color: var(--uw-text-muted);
     -unity-font-definition: url("../Fonts/Inter-Regular.ttf");
 }
@@ -211,14 +211,14 @@
 }
 
 .uw-field__label {
-    font-size: var(--uw-type-14);
+    font-size: var(--uw-type-16);
     color: var(--uw-text-muted);
     margin-bottom: var(--uw-space-2);
 }
 
 .uw-field__hint {
-    font-size: var(--uw-type-14);
-    color: var(--uw-text-faint);
+    font-size: var(--uw-type-16);
+    color: var(--uw-text-muted);
     margin-top: var(--uw-space-2);
     white-space: normal;
 }
@@ -342,7 +342,7 @@
 }
 
 .uw-step__label {
-    font-size: var(--uw-type-14);
+    font-size: var(--uw-type-16);
     color: var(--uw-text-faint);
 }
 
@@ -413,7 +413,7 @@
 }
 
 .uw-keycap--small .uw-keycap__label {
-    font-size: 12px;
+    font-size: var(--uw-type-14);
     color: var(--uw-text-muted);
 }
 
@@ -497,7 +497,7 @@
 .uw-credits__role {
     width: 130px;
     flex-shrink: 0;
-    font-size: var(--uw-type-14);
+    font-size: var(--uw-type-16);
     color: var(--uw-text-muted);
     padding-top: 1px;
 }

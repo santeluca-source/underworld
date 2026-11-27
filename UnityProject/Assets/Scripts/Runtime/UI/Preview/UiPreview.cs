@@ -251,6 +251,7 @@ namespace Underworld.UI
     {
         public LauncherState State { get; private set; } = LauncherState.Idle;
         public string StatusText { get; private set; } = string.Empty;
+        public bool DisconnectedInGame => false;
         public event Action StateChanged;
 
         float _timer;

@@ -50,9 +50,14 @@ namespace Underworld.Tests
         [TestCase("Neo!", NameCheck.InvalidChar)]
         [TestCase("a.b.c", NameCheck.InvalidChar)]
         [TestCase("<b>x</b>", NameCheck.InvalidChar)]
+        [TestCase("Neo٣٤", NameCheck.InvalidChar)] // cifre arabe: il server le rifiuta
+        [TestCase("Neo１", NameCheck.InvalidChar)]       // cifra a larghezza piena
         public void PlayerName_FollowsServerRules(string name, NameCheck expected)
         {
             Assert.AreEqual(expected, PlayerNameRules.Check(name));
+            // Stesso verdetto del server.
+            string normalized = Underworld.Net.PlayerNameRules.Normalize(name);
+            Assert.AreEqual(expected == NameCheck.Ok, Underworld.Net.PlayerNameRules.IsValid(normalized), name);
         }
 
         [Test]

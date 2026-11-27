@@ -73,7 +73,7 @@ namespace Underworld.Net
         public static readonly string ServerClosing = Format(ServerClosingCode, "The server has closed.");
 
         public static readonly string MovementKick = Format(MovementKickCode,
-            "Disconnected from the server: invalid movement.");
+            "The server detected invalid movement.");
 
         public static readonly string InternalError = Format(InternalErrorCode, "Internal server error.");
     }

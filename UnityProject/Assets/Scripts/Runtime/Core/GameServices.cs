@@ -13,6 +13,8 @@ namespace Underworld.Core
     {
         LauncherState State { get; }
         string StatusText { get; }
+        /// <summary>Vero se l'ultimo errore (Failed) è una disconnessione durante la partita, non una connessione fallita.</summary>
+        bool DisconnectedInGame { get; }
         event Action StateChanged;
 
         /// <summary>Avvia i server sul PC (solo per questo PC) e collega il giocatore.</summary>

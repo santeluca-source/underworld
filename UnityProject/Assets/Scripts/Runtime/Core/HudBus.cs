@@ -24,6 +24,8 @@ namespace Underworld.Core
         public static int Wanted { get; private set; }
         public static string Objective { get; private set; }
         public static string Area { get; private set; }
+        /// <summary>Indirizzo "ip:porta" a cui si collegano gli amici quando questo PC ospita la partita (null = non ospita).</summary>
+        public static string HostAddress { get; private set; }
 
         public static void SetPrompt(string text)
         {
@@ -63,9 +65,13 @@ namespace Underworld.Core
             AreaChanged?.Invoke(displayName);
         }
 
+        /// <summary>Indirizzo per gli amici (lo mostra il menu di pausa). null = questo PC non ospita.</summary>
+        public static void SetHostAddress(string address) => HostAddress = string.IsNullOrEmpty(address) ? null : address;
+
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         static void ResetStatics()
         {
+            HostAddress = null;
             PromptChanged = null; ToastRequested = null; CashChanged = null;
             WantedChanged = null; ObjectiveChanged = null; AreaChanged = null;
             Prompt = null; Cash = 0; Wanted = 0; Objective = null; Area = null;

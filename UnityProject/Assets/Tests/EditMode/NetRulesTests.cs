@@ -115,5 +115,50 @@ namespace Underworld.Tests
             Assert.IsFalse(ServerRuntime.IsAreaPlayable(true, 0));
             Assert.IsTrue(ServerRuntime.IsAreaPlayable(true, 1));
         }
+
+        [Test]
+        public void Launcher_QuoteArg_KeepsTrailingBackslashAndQuotes()
+        {
+            Assert.AreEqual(@"""C:\dati""", GameLauncher.QuoteArg(@"C:\dati"));
+            // Barra finale raddoppiata: altrimenti \" diventa una virgoletta letterale.
+            Assert.AreEqual(@"""C:\a b\\""", GameLauncher.QuoteArg(@"C:\a b\"));
+            Assert.AreEqual(@"""a\""b""", GameLauncher.QuoteArg(@"a""b"));
+            Assert.AreEqual(@"""""", GameLauncher.QuoteArg(""));
+            Assert.AreEqual(@"C:\dati", GameLauncher.TrimDirectory(@"C:\dati\"));
+            Assert.AreEqual(@"C:\", GameLauncher.TrimDirectory(@"C:\"));
+        }
+
+        [Test]
+        public void Launcher_ReasonTextFromServer_IsPlainAndShort()
+        {
+            Assert.AreEqual("bsize=99big text/b", GameLauncher.CleanReasonText("<b><size=99>big text</b>"));
+            Assert.IsNull(GameLauncher.CleanReasonText("<>"));
+            string longText = GameLauncher.CleanReasonText(new string('x', 5000));
+            Assert.LessOrEqual(longText.Length, GameLauncher.MaxReasonLength + 3);
+            Assert.AreEqual("a b", GameLauncher.CleanReasonText("a\nb"));
+        }
+
+        [Test]
+        public void Launcher_AreaWithoutGame_GoesBackToMenu()
+        {
+            // Cancel durante il caricamento dell'area: l'area si attiva con il launcher fermo.
+            Assert.IsTrue(GameLauncher.ShouldLeaveArea("Area_Downtown", false, LauncherState.Idle, false, true));
+            Assert.IsTrue(GameLauncher.ShouldLeaveArea("Area_Downtown", false, LauncherState.Failed, false, false));
+            // Connessione in corso o partita: si resta.
+            Assert.IsFalse(GameLauncher.ShouldLeaveArea("Area_Downtown", false, LauncherState.Connecting, true, false));
+            Assert.IsFalse(GameLauncher.ShouldLeaveArea("Area_Downtown", false, LauncherState.InGame, true, false));
+            // Server e scene che non sono aree: mai.
+            Assert.IsFalse(GameLauncher.ShouldLeaveArea("Area_Downtown", true, LauncherState.Idle, false, false));
+            Assert.IsFalse(GameLauncher.ShouldLeaveArea("MainMenu", false, LauncherState.Idle, false, true));
+        }
+
+        [Test]
+        public void Launcher_ReadsPidAndPortFromReadyFile()
+        {
+            Assert.IsTrue(GameLauncher.TryParseReady("{\"pid\":4321,\"area\":\"Downtown\",\"port\":7777,\"listen\":\"127.0.0.1\"}", out int pid, out int port));
+            Assert.AreEqual(4321, pid);
+            Assert.AreEqual(7777, port);
+            Assert.IsFalse(GameLauncher.TryParseReady("{\"area\":\"Downtown\"}", out _, out _));
+        }
     }
 }

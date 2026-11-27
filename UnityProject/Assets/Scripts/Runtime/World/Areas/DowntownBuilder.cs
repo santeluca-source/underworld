@@ -569,7 +569,8 @@ namespace Underworld.World.Areas
                 Opening.Window(Side.South, -2f, 10f, 3f, 1f),
             };
             float floor = _ctx.Room(min, max, Sw, h, 0.3f, Pal.White, Pal.Marble, Pal.RoofLight, openings);
-            _ctx.WrapBand(min, max, Sw + h - 0.6f, Sw + h + 0.35f, 0.12f, Pal.SignBlue);
+            // La fascia finisce 2 cm sopra il tetto (tetto alto 0,35): niente facce complanari (z-fighting).
+            _ctx.WrapBand(min, max, Sw + h - 0.6f, Sw + h + 0.37f, 0.12f, Pal.SignBlue);
             _ctx.Sign("DEALERSHIP", new Vector3(min.x - 0.12f, Sw + 5.75f, c.z), 270f, 0.11f, Pal.Black, Pal.SignWhite, 0.2f);
 
             // Pedane per le auto in mostra (le mette il modulo Veicoli sui punti display.0..3).

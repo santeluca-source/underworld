@@ -53,10 +53,11 @@ namespace Underworld.UI
         public const int MinLength = 3;
         public const int MaxLength = 16;
 
-        /// <summary>Nome pulito: senza spazi all'inizio e alla fine.</summary>
-        public static string Normalize(string raw) => raw == null ? string.Empty : raw.Trim();
+        /// <summary>Nome pulito con la stessa regola del server (spazi ai bordi tolti, spazi ripetuti uniti).</summary>
+        public static string Normalize(string raw) => Underworld.Net.PlayerNameRules.Normalize(raw);
 
-        public static bool IsAllowedChar(char c) => char.IsLetterOrDigit(c) || c == ' ' || c == '_' || c == '-';
+        /// <summary>Stessi caratteri del server (cifre solo 0-9: le cifre Unicode il server le rifiuta).</summary>
+        public static bool IsAllowedChar(char c) => Underworld.Net.PlayerNameRules.IsAllowedChar(c);
 
         public static NameCheck Check(string raw)
         {

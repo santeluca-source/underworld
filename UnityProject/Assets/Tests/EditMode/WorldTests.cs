@@ -143,7 +143,8 @@ namespace Underworld.Tests
                 // Raggio verso il basso da poco sopra il punto: deve trovare un pavimento quasi piano vicino ai piedi.
                 if (!Physics.Raycast(p + Vector3.up * 0.6f, Vector3.down, out var hit, 1.2f, ~0, QueryTriggerInteraction.Ignore))
                     bad.Append($"{a.Id} (nessun pavimento) ");
-                else if (hit.normal.y < 0.8f || Mathf.Abs(hit.point.y - p.y) > 0.3f)
+                // Il pavimento può stare poco sotto i piedi, mai sopra di più di 5 cm (sarebbe un ostacolo basso, non il suolo).
+                else if (hit.normal.y < 0.8f || hit.point.y - p.y > 0.05f || p.y - hit.point.y > 0.3f)
                     bad.Append($"{a.Id} (pavimento a {hit.point.y - p.y:0.00} m, normale {hit.normal.y:0.00}) ");
             }
             Assert.IsTrue(bad.Length == 0, "Punti speciali non su terreno calpestabile: " + bad);
@@ -159,6 +160,9 @@ namespace Underworld.Tests
                 // Capsula di una persona (raggio 0.3 m, alta 1.8 m) staccata dal pavimento di 0.35 m.
                 if (Physics.CheckCapsule(p + Vector3.up * 0.65f, p + Vector3.up * 1.5f, 0.3f, ~0, QueryTriggerInteraction.Ignore))
                     bad.Append(a.Id).Append(' ');
+                // Fascia dei piedi (da 6 a 35 cm): la capsula sopra non la vede (gradini, cordoli, casse basse).
+                else if (Physics.CheckBox(p + Vector3.up * 0.205f, new Vector3(0.3f, 0.145f, 0.3f), Quaternion.identity, ~0, QueryTriggerInteraction.Ignore))
+                    bad.Append(a.Id).Append("(piedi) ");
             }
             Assert.IsTrue(bad.Length == 0, "Punti speciali dentro un collider: " + bad);
         }

@@ -177,6 +177,7 @@ namespace Underworld.UI
             v.Add(head);
 
             _busyText = UiBuild.Text(string.Empty, UiClasses.Body, UiClasses.Muted, "uw-status__text");
+            _busyText.enableRichText = false;
             v.Add(_busyText);
 
             _steps = UiBuild.Box("uw-steps", PickingMode.Ignore);
@@ -204,6 +205,7 @@ namespace Underworld.UI
             head.Add(_errorTitle);
             v.Add(head);
             _errorText = UiBuild.Text(string.Empty, UiClasses.Body, "uw-status__text");
+            _errorText.enableRichText = false; // il motivo può arrivare dal server: testo semplice
             v.Add(_errorText);
 
             var actions = UiBuild.Box("uw-menu__actions-row");
@@ -444,6 +446,7 @@ namespace Underworld.UI
                     if (changed) _failureDismissed = false;
                     if (!_failureDismissed)
                     {
+                        _errorTitle.text = l.DisconnectedInGame ? "Disconnected" : "Connection failed";
                         _errorText.text = string.IsNullOrEmpty(l.StatusText) ? "Something went wrong. Try again in a moment." : l.StatusText;
                         _retry.style.display = _last == PendingAction.None ? DisplayStyle.None : DisplayStyle.Flex;
                         if (_view != View.Error) ShowView(View.Error, !entering);

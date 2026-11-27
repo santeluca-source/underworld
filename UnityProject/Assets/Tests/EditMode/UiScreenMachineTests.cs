@@ -41,6 +41,8 @@ namespace Underworld.Tests
             Assert.AreEqual(UiMode.None, UiModeRules.Resolve("Downtown_Test", null)); // vecchia scena tolta
             Assert.AreEqual(UiMode.None, UiModeRules.Resolve("Bootstrap", null));
             Assert.AreEqual(UiMode.None, UiModeRules.Resolve("Bootstrap", LauncherState.Idle));
+            // Area caricata dopo "Cancel" (launcher fermo): niente HUD senza personaggio.
+            Assert.AreEqual(UiMode.Loading, UiModeRules.Resolve("Area_Downtown", LauncherState.Idle));
         }
 
         [Test]

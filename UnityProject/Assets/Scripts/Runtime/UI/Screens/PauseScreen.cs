@@ -62,7 +62,11 @@ namespace Underworld.UI
             if (_visible) return;
             _visible = true;
             string area = HudBus.Area;
-            _context.text = string.IsNullOrEmpty(area) ? "The world keeps moving" : area + " · the world keeps moving";
+            string host = HudBus.HostAddress;
+            if (!string.IsNullOrEmpty(host))
+                _context.text = $"Hosting · friends join at {host}";
+            else
+                _context.text = string.IsNullOrEmpty(area) ? "The world keeps moving" : area + " · the world keeps moving";
             Root.style.display = DisplayStyle.Flex;
             UiAnim.Set(Root, true);
             UiAnim.In(_scrim, 0.2f);

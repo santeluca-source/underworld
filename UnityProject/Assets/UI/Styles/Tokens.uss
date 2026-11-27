@@ -6,7 +6,7 @@
   pulsante principale, icona dell'obiettivo, stelle accese, piccoli dettagli.
 */
 :root, .uw-root {
-    /* Testo (contrasto su vetro scuro >= 4,5:1) */
+    /* Testo (contrasto su vetro scuro >= 4,5:1). Il testo con alfa nello spazio Linear risulta più chiaro, non meno. */
     --uw-text: rgb(242, 243, 245);
     --uw-text-muted: rgba(232, 234, 240, 0.66);
     --uw-text-faint: rgba(232, 234, 240, 0.46);
@@ -22,9 +22,13 @@
     --uw-danger: rgb(240, 110, 92);
     --uw-info: rgb(140, 178, 245);
 
-    /* Vetro (ripiego senza blur: fondo scuro al 55-70 %) */
-    --uw-glass-fill: rgba(13, 15, 21, 0.64);
-    --uw-glass-fill-strong: rgba(12, 14, 19, 0.80);
+    /*
+      Vetro (ripiego senza blur). Il progetto è in spazio colore Linear: UI Toolkit mescola l'alfa in lineare,
+      quindi il mondo "passa" molto di più. Alfa = 1 - (1 - alfa voluto)^2,2:
+      vetro 0,64 voluto -> 0,89; vetro forte 0,80 -> 0,96; velo 0,55 -> 0,83; toast 0,82 -> 0,96.
+    */
+    --uw-glass-fill: rgba(13, 15, 21, 0.89);
+    --uw-glass-fill-strong: rgba(12, 14, 19, 0.96);
     --uw-glass-border: rgba(255, 255, 255, 0.16);
     --uw-glass-highlight: rgba(255, 255, 255, 0.30);
 
@@ -34,8 +38,8 @@
     --uw-surface-press: rgba(255, 255, 255, 0.14);
     --uw-field-fill: rgba(0, 0, 0, 0.30);
     --uw-field-line: rgba(255, 255, 255, 0.12);
-    --uw-scrim: rgba(6, 7, 10, 0.55);
-    --uw-toast-fill: rgba(12, 14, 19, 0.82);
+    --uw-scrim: rgba(6, 7, 10, 0.83);
+    --uw-toast-fill: rgba(12, 14, 19, 0.96);
 
     /* Spazi */
     --uw-space-1: 4px;
@@ -50,7 +54,11 @@
     --uw-radius-control: 10px;
     --uw-radius-small: 6px;
 
-    /* Testo: scala 14 / 16 / 20 / 28 / 40 / 64, più il titolo gigante del menu */
+    /*
+      Testo: scala 14 / 16 / 20 / 28 / 40 / 64, più il titolo gigante del menu.
+      A 1280x720 la scala del pannello è 0,67: il testo che informa (descrizioni, suggerimenti, etichette)
+      usa almeno 16; il 14 resta solo per le etichette dei tasti.
+    */
     --uw-type-14: 14px;
     --uw-type-16: 16px;
     --uw-type-20: 20px;
