@@ -45,6 +45,9 @@ namespace Underworld.Player
         /// <summary>Il personaggio locale è stato tolto (uscita, disconnessione).</summary>
         public static event Action LocalPlayerDespawned;
 
+        /// <summary>Punto di spawn deciso dal server (uguale su tutti i processi).</summary>
+        public Vector3 SpawnPosition => _spawnPosition.Value;
+
         /// <summary>Nome visibile del giocatore.</summary>
         public string Name => _displayName.Value.ToString();
 
@@ -83,7 +86,14 @@ namespace Underworld.Player
 
             // Solo il proprietario muove il CharacterController. Le copie degli altri giocatori (e quelle
             // del server) usano un collider semplice: due CharacterController sovrapposti bloccano la fisica.
-            if (_cc != null) _cc.enabled = IsOwner;
+            // Spento e poi riacceso: Netcode crea l'oggetto in (0,0,0) e poi lo sposta al punto di spawn;
+            // con Physics.autoSyncTransforms spento la capsula del CharacterController resterebbe in (0,0,0)
+            // e il primo Move riporterebbe lì il personaggio (vedi ThirdPersonController.SyncCharacterController).
+            if (_cc != null)
+            {
+                _cc.enabled = false;
+                _cc.enabled = IsOwner;
+            }
             if (_remoteCollider != null) _remoteCollider.enabled = !IsOwner;
 
             if (IsOwner)
@@ -144,6 +154,9 @@ namespace Underworld.Player
                     if (_cc != null) _cc.enabled = ccOn;
                 }
             }
+            // Causa vera del vecchio blocco in (0,0,0): la capsula del CharacterController non segue da sola
+            // la posizione del transform (autoSyncTransforms spento). La rimetto sul transform prima del primo Move.
+            ThirdPersonController.SyncCharacterController(_cc);
             if (Controller != null)
             {
                 Controller.ResetMotion();

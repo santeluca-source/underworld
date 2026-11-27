@@ -113,6 +113,20 @@ namespace Underworld.Player
             Velocity = motion;
         }
 
+        /// <summary>
+        /// Rimette la capsula del CharacterController sulla posizione attuale del transform.
+        /// Serve dopo ogni spostamento diretto del transform (spawn di Netcode, teletrasporto):
+        /// il progetto ha Physics.autoSyncTransforms spento, e senza questo il primo Move partirebbe
+        /// dalla posizione vecchia della capsula (per lo spawn: (0,0,0) del prefab).
+        /// Spegnere e riaccendere ricrea la capsula nel punto giusto. Un controller spento resta spento.
+        /// </summary>
+        public static void SyncCharacterController(CharacterController cc)
+        {
+            if (cc == null || !cc.enabled) return;
+            cc.enabled = false;
+            cc.enabled = true;
+        }
+
         /// <summary>Azzera velocità e caduta (dopo un teletrasporto o una correzione del server).</summary>
         public void ResetMotion()
         {
