@@ -1,0 +1,11 @@
+{
+  "description": "Server TestGround + client Alfa e Beta. Ognuno vede 2 giocatori; Alfa cammina ~10 m; Beta lo vede muoversi di almeno 8 m entro 10 s; il server ha 2 client registrati con i nomi.",
+  "timeoutSec": 120,
+  "servers": [
+    { "area": "TestGround", "autotest": "connect_two_clients.server", "args": ["-expect-names", "Alfa,Beta"] }
+  ],
+  "clients": [
+    { "name": "Alfa", "autotest": "connect_two_clients.walker", "graphics": false, "args": ["-expect-names", "Alfa,Beta"] },
+    { "name": "Beta", "autotest": "connect_two_clients.watcher", "graphics": true, "args": ["-expect-names", "Alfa,Beta", "-walker", "Alfa"] }
+  ]
+}

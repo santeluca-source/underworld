@@ -1,0 +1,47 @@
+{
+  "description": "Quattro client con -bot wander entrano insieme e girano, corrono e saltano per 10 s: si muovono e il server non li corregge mai (prova -bot e gli ingressi simultanei).",
+  "timeoutSec": 90,
+  "servers": [
+    {
+      "area": "TestGround"
+    }
+  ],
+  "clients": [
+    {
+      "name": "BotUno",
+      "autotest": "bot_wander.client",
+      "graphics": false,
+      "args": [
+        "-bot",
+        "wander"
+      ]
+    },
+    {
+      "name": "BotDue",
+      "autotest": "bot_wander.client",
+      "graphics": false,
+      "args": [
+        "-bot",
+        "wander"
+      ]
+    },
+    {
+      "name": "BotTre",
+      "autotest": "bot_wander.client",
+      "graphics": false,
+      "args": [
+        "-bot",
+        "wander"
+      ]
+    },
+    {
+      "name": "BotQuattro",
+      "autotest": "bot_wander.client",
+      "graphics": false,
+      "args": [
+        "-bot",
+        "wander"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "description": "Server con -maxplayers 2 e tre client: il terzo viene rifiutato con il motivo 'server pieno'.",
+  "timeoutSec": 150,
+  "servers": [
+    { "area": "TestGround", "autotest": "server_full.server", "args": ["-maxplayers", "2"] }
+  ],
+  "clients": [
+    { "name": "Uno", "autotest": "stay_in_game", "graphics": false, "holdUntilOthersDone": true },
+    { "name": "Due", "autotest": "stay_in_game", "graphics": false, "holdUntilOthersDone": true },
+    { "name": "Tre", "autotest": "expect_reject", "graphics": false, "startAfterInGame": ["Uno", "Due"], "args": ["-expect-reason", "server_full"] }
+  ]
+}
