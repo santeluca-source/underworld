@@ -1,4 +1,4 @@
-﻿# Architettura di UNDERWORLD
+# Architettura di UNDERWORLD
 
 Questo documento è il contratto tecnico del progetto. Ogni modulo lo segue.
 Se una scelta cambia, aggiorna questo file e `Docs/DECISIONS.md`.
@@ -245,3 +245,83 @@ Traccia WORLD (costruzione del mondo a runtime + arte). Codice in `Runtime/World
 - Salva un PNG per ogni `PreviewShot` dell'area e scrive nel log batch, triangoli e FPS, poi chiude.
 
 **Test EditMode** (`Assets/Tests/EditMode/WorldTests.cs`): determinismo (hash operazioni e geometria), headless senza renderer, id unici, punti richiesti, uscite verso le aree giuste, punti su terreno calpestabile e non dentro i collider.
+## Note UI
+
+Traccia UI (ramo `feat/a1-ui`). Codice in `Runtime/UI/`, stili e asset in `Assets/UI/`, setup in `Editor/Steps/UI/`.
+
+### Come nasce la UI
+- `UiRoot` nasce da solo (`RuntimeInitializeOnLoadMethod`, prima della prima scena) e resta tra le scene (`DontDestroyOnLoad`).
+- Non nasce con `-server` né in batchmode senza grafica (`UiRoot.ShouldCreate()`).
+- `UIDocument` + `PanelSettings` in `Assets/UI/Resources/Underworld/UiPanelSettings.asset` (creato da `UiAssetsStep`): scala con lo schermo, 1920×1080, match 0,5.
+- Tema `Assets/UI/Theme/UnderworldTheme.tss`: tema runtime standard di Unity + `Tokens.uss` (unico posto con colori, spazi 4/8/12/16/24/32, testo 14/16/20/28/40/64, raggi) + `Base.uss` + `Screens.uss`.
+- Carattere Inter (SIL OFL 1.1, licenza in `Assets/UI/Fonts/OFL.txt`). `InterTabular-SemiBold` ha le cifre a larghezza fissa (soldi).
+
+### Schermate
+- `UiScreenMachine` + `UiModeRules` (logica pura, test `UiScreenMachineTests`): la schermata dipende dalla scena attiva e da `GameServices.Launcher.State`.
+  - `InGame` → HUD (sempre). Scena `MainMenu` → menu. Avvio/connessione/trasferimento/errore fuori dal menu → caricamento a schermo pieno. Scena `Area_*` senza launcher → HUD.
+- Menu, caricamento e pausa chiamano `InputGate.Block(UiRoot)`. Ogni finestra aperta chiama `InputGate.Block(finestra)`.
+- Mouse: con menu, pausa o finestra aperta `UiRoot.LateUpdate` lo libera ogni frame. La camera del gioco deve bloccarlo solo se `InputGate.GameplayBlocked` è falso.
+- Esc (o Start del gamepad): chiude la finestra in cima, poi apre/chiude la pausa; nel menu torna alla vista principale.
+- Pausa: il mondo non si ferma (gioco in rete). Pulsanti: Riprendi, Torna al menu (`Launcher.Disconnect`), Esci dal gioco (`Launcher.QuitGame`).
+- Menu senza launcher (`GameServices.Launcher == null`): i pulsanti di gioco mostrano "Partita non disponibile", nessuna eccezione.
+- Nome del giocatore: `PlayerPrefs["underworld.playerName"]`, stesse regole del server (`PlayerNameRules`). Indirizzo e porta di "Unisciti": `underworld.joinAddress`, `underworld.joinPort` (default 7777). Solo IPv4 o `localhost`.
+
+### Come un modulo aggiunge UI (senza toccare i file della UI)
+Tutto passa da `UiRegistry` e `UiWindows` (namespace `Underworld.UI`). Si può registrare prima che la UI esista; sul server non costa niente.
+
+```csharp
+// 1) Finestra del modulo: una classe che eredita UiWindow (vetro, titolo, X, contenuto che scorre, piè di pagina).
+public sealed class GarageWindow : UiWindow
+{
+    public const string Id = "vehicles.garage";
+    public GarageWindow() : base("Garage", 520f)
+    {
+        Content.Add(UiBuild.Text("Nessun veicolo", UiClasses.Body, UiClasses.Muted));
+        AddFooterButton("Chiudi", Close);
+        AddFooterButton("Prendi l'auto", OnTake, primary: true);
+    }
+    protected internal override void OnOpened() { /* aggiorna i dati (stesso assembly: "protected internal") */ }
+    void OnTake() { /* manda la richiesta al server */ }
+}
+
+// 2) Registrazione (una volta, es. all'avvio del modulo sul client).
+[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+static void RegisterUi()
+{
+    UiRegistry.RegisterWindow(GarageWindow.Id, () => new GarageWindow());
+    UiRegistry.RegisterHudWidget("vehicles.speed", HudSlot.BottomRight, () => new Label("0 km/h"), order: 10);
+    // Fogli USS del modulo (facoltativo): UiRegistry.RegisterStyleSheet(Resources.Load<StyleSheet>("Vehicles/Vehicles"));
+}
+
+// 3) Apertura (es. dal gestore dell'interazione): UiWindows.Open(GarageWindow.Id); Toggle, Close, IsOpen.
+```
+
+- Proprietà di `UiWindow`: `CloseOnEscape`, `BlocksGameplay`, `ShowScrim` (default tutte true), eventi `Opened`/`Closed`.
+- Zone dell'HUD (`HudSlot`): `TopLeft` (sotto l'obiettivo), `TopRight` (sotto soldi, stelle, avvisi), `BottomLeft`, `BottomRight`, `BottomCenter` (sopra il suggerimento E).
+- Classi utili (`UiClasses`): `uw-glass`, `uw-btn` + `uw-btn--primary|ghost|quiet`, `uw-heading`, `uw-body`, `uw-muted`, `uw-small`, `uw-tabular`, `uw-text-shadow`. Fabbriche in `UiBuild` (Button, Field, Text, Glass, IconButton). Animazioni in `UiAnim` (In, Out, Pulse, StaggerChildren: tempi del vault).
+- Regola: al massimo 1–2 pannelli di vetro per schermata; nell'HUD niente vetro dietro ogni elemento.
+
+### HUD (solo da HudBus)
+- Soldi in alto a destra: cifre fisse, formato `12.500 $` (`UiFormat`), il numero rotola al cambio, pulse breve, riga `+2.250 $`.
+- Stelle ricercato 0–5 (nascoste a 0). Nome dell'area al centro quando cambia (2,8 s). Obiettivo in alto a sinistra (nascosto con null). Suggerimento in basso: tasto `E` + testo (se il testo inizia con "E —" il prefisso si toglie). Avvisi: pila di 3, spariscono da soli (4–6 s).
+
+### Sfondo del menu
+- Scena `MainMenu` (priorità di build 10, passo `MainMenuSceneStep`): camera + `MenuBackdrop`, città notturna low poly fatta a codice (seme fisso, finestre accese negli shader, lampioni, luci rosse sulle torri, auto che passano), camera che gira piano.
+- 4 shader HLSL per URP 17.3 in `Assets/UI/Backdrop/Shaders` (`Underworld/UI/Skyline*`). `UiAssetsStep` controlla che compilino (`ShaderUtil.ShaderHasError`) e crea i materiali. Provati nel player Windows (screenshot).
+- Il preset `StreetDay` (vista da strada di giorno) serve solo all'anteprima dell'HUD.
+
+### Anteprima e screenshot (senza rete)
+```
+UNDERWORLD.exe -uipreview <modo> [-autoshot file.png] [-autoshot-delay s] -screen-width 1920 -screen-height 1080 -screen-fullscreen 0 -popupwindow -logFile log.txt
+```
+- Modi: `menu`, `menu-join`, `menu-busy`, `menu-error`, `menu-offline`, `credits`, `hud`, `pause`, `window`.
+- Usa `PreviewLauncher` (finto, nessuna rete) e dati finti su `HudBus`. Carica la scena `MainMenu`. Con `-autoshot` salva e chiude.
+- Attenzione: se una scena contiene anche `Dev/AutoScreenshot`, anche quello reagisce a `-autoshot` (dopo 3 s chiude il gioco).
+
+### Test
+- EditMode `UiFormatTests` (soldi, nome, indirizzo) e `UiScreenMachineTests` (schermate, pausa, Esc, avvisi).
+
+### Da fare / non verificato
+- Clic, tastiera ed Esc nel player non sono provati con input automatico: sono provati la logica (test) e l'aspetto (screenshot).
+- Il flusso con il launcher vero (rete) non è provato in questo ramo: manca l'implementazione di `IGameLauncher`.
+- Navigazione con il gamepad tra i pulsanti: solo il fuoco iniziale nella pausa.

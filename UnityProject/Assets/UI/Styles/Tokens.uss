@@ -1,0 +1,65 @@
+/*
+  Token di design di UNDERWORLD: l'unico posto con colori, spazi, raggi e misure del testo.
+  Gli altri fogli usano solo var(--uw-...). Misure in punti di riferimento (1920x1080).
+
+  Accento: ambra calda, come le lampade al sodio della città di notte. Usalo poco:
+  pulsante principale, icona dell'obiettivo, stelle accese, piccoli dettagli.
+*/
+:root, .uw-root {
+    /* Testo (contrasto su vetro scuro >= 4,5:1) */
+    --uw-text: rgb(242, 243, 245);
+    --uw-text-muted: rgba(232, 234, 240, 0.66);
+    --uw-text-faint: rgba(232, 234, 240, 0.46);
+    --uw-text-on-accent: rgb(28, 18, 6);
+
+    /* Accento e stati */
+    --uw-accent: rgb(242, 165, 62);
+    --uw-accent-hover: rgb(247, 182, 92);
+    --uw-accent-press: rgb(226, 148, 46);
+    --uw-accent-soft: rgba(242, 165, 62, 0.16);
+    --uw-success: rgb(92, 204, 140);
+    --uw-warning: rgb(240, 196, 80);
+    --uw-danger: rgb(240, 110, 92);
+    --uw-info: rgb(140, 178, 245);
+
+    /* Vetro (ripiego senza blur: fondo scuro al 55-70 %) */
+    --uw-glass-fill: rgba(13, 15, 21, 0.64);
+    --uw-glass-fill-strong: rgba(12, 14, 19, 0.80);
+    --uw-glass-border: rgba(255, 255, 255, 0.16);
+    --uw-glass-highlight: rgba(255, 255, 255, 0.30);
+
+    /* Superfici dentro il vetro (pulsanti, campi) */
+    --uw-surface: rgba(255, 255, 255, 0.06);
+    --uw-surface-hover: rgba(255, 255, 255, 0.10);
+    --uw-surface-press: rgba(255, 255, 255, 0.14);
+    --uw-field-fill: rgba(0, 0, 0, 0.30);
+    --uw-field-line: rgba(255, 255, 255, 0.12);
+    --uw-scrim: rgba(6, 7, 10, 0.55);
+    --uw-toast-fill: rgba(12, 14, 19, 0.82);
+
+    /* Spazi */
+    --uw-space-1: 4px;
+    --uw-space-2: 8px;
+    --uw-space-3: 12px;
+    --uw-space-4: 16px;
+    --uw-space-5: 24px;
+    --uw-space-6: 32px;
+
+    /* Raggi */
+    --uw-radius-panel: 14px;
+    --uw-radius-control: 10px;
+    --uw-radius-small: 6px;
+
+    /* Testo: scala 14 / 16 / 20 / 28 / 40 / 64, più il titolo gigante del menu */
+    --uw-type-14: 14px;
+    --uw-type-16: 16px;
+    --uw-type-20: 20px;
+    --uw-type-28: 28px;
+    --uw-type-40: 40px;
+    --uw-type-64: 64px;
+    --uw-type-display: 132px;
+
+    /* Misure fisse */
+    --uw-control-height: 46px;
+    --uw-panel-width: 440px;
+}
