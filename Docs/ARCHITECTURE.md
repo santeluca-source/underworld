@@ -78,6 +78,7 @@ UNDERWORLD.exe -connect 127.0.0.1:7777 -name Bot1 -profile C:\tmp\bot1 -bot wand
 - Righe di log con `[Server]`. Pronto: riga `[Server] Pronto` e file `<datadir>/server.ready` (JSON con pid, area, porta).
 - Chiusura pulita: evento `ServerRuntime.ServerStopping` (Fase 5: salvataggi qui), poi `IServerModule.OnServerStopping`, poi giocatori scollegati con il motivo `server_closing`, poi uscita.
 - Motivi di chiusura: processo padre chiuso (`-parentPid`), file `<datadir>/server.stop` (test e launcher), uscita dell'applicazione.
+- Area non giocabile = errore fatale: se `AreaBuilder` non ha costruito il mondo (eccezione nel costruttore, ArtLibrary mancante) o non c'è nessun punto `Spawn`, il server scrive l'errore, **non** scrive `server.ready` e si chiude con codice 1 (`ServerRuntime.IsAreaPlayable`). Il mondo a metà viene tolto e le sue risorse liberate.
 - Spawn: punto `AreaAnchor` di tipo `Spawn` più libero (`SpawnSelector`), dopo la sincronizzazione della scena del client (`OnSynchronizeComplete`). In Downtown sono `downtown.spawn.0..7` intorno alla fontana della piazza.
 
 ### Approvazione della connessione
@@ -91,9 +92,10 @@ UNDERWORLD.exe -connect 127.0.0.1:7777 -name Bot1 -profile C:\tmp\bot1 -bot wand
 
 ### Launcher (`GameLauncher`, interfaccia `IGameLauncher` in `GameServices.Launcher`)
 - Stati: `Idle`, `StartingServer`, `Connecting`, `InGame`, `Transferring`, `Failed`. `StatusText` è sempre in inglese, pronto per la UI.
-- `PlayLocal`: avvia lo stesso exe come server figlio (`-server -area Downtown -port <p> -listen 127.0.0.1 -parentPid <pid> -datadir <dir> -batchmode -nographics -logFile <dir>/server.log`), aspetta `server.ready`, poi si collega con nuovi tentativi (attese 0,5 → 3 s) fino a 25 s. Si riprova solo senza risposta o con `server_starting`; un rifiuto vero ferma subito.
-- `HostForFriends`: come PlayLocal ma `-listen 0.0.0.0`; il testo di stato mostra IP di rete e porta. Non è nei test automatici (aprirebbe l'avviso del firewall).
-- `Disconnect` ("Main menu" nella pausa, "Cancel" nel menu): ferma il client e torna al menu. Il server figlio resta acceso e il prossimo PlayLocal lo riusa; si chiude quando il gioco si chiude (`-parentPid`). Se cambiano modo o porta, il vecchio server riceve `server.stop` (poi Kill dopo 5 s).
+- `PlayLocal`: avvia lo stesso exe come server figlio (`-server -area Downtown -port <p> -listen 127.0.0.1 -parentPid <pid> -datadir <dir> -batchmode -nographics -logFile <dir>/server.log`), aspetta `server.ready`, poi si collega con nuovi tentativi (attese 0,5 → 3 s) fino a 25 s. Si riprova solo senza risposta, con `server_starting` o con `already_connected` (sessione vecchia dopo un crash: l'attesa si allunga fino a 35 s, il server la chiude dopo il timeout del transport); un rifiuto vero ferma subito. Il testo del motivo mandato dal server è ripulito (niente `<` `>`, al massimo 200 caratteri) e le etichette di stato non usano il rich text. Gli argomenti del server figlio sono sempre tra virgolette con le regole di Windows (`QuoteArg`).
+- `HostForFriends`: come PlayLocal ma `-listen 0.0.0.0`. In gioco l'indirizzo `ip:porta` per gli amici si vede in un toast all'arrivo e sempre nel menu di pausa (`HudBus.HostAddress`). Non è nei test automatici (aprirebbe l'avviso del firewall).
+- `Disconnect` ("Main menu" nella pausa, "Cancel" nel menu): ferma il client e torna al menu. Se Netcode stava ancora caricando l'area, il launcher torna al menu quando l'area si attiva (`GameLauncher.ShouldLeaveArea`); un'area senza partita con il launcher presente mostra l'attesa, non l'HUD. Il server figlio resta acceso e il prossimo PlayLocal lo riusa. Il server figlio si chiude quando il launcher sparisce: uscita dal gioco (`OnApplicationQuit`), fine del Play nell'editor (`ExitingPlayMode`) con `server.stop` e poi Kill dopo 3 s; `-parentPid` resta come rete di sicurezza (nell'editor il padre è Unity, che resta aperto). Se cambiano modo o porta, il vecchio server riceve `server.stop` (poi Kill dopo 5 s). Prima di avviare un server nuovo, un server rimasto da prima (pid e porta letti dal suo `server.ready`, stesso nome dell'exe) viene chiuso.
+- Una disconnessione durante la partita mostra il titolo "Disconnected" (`IGameLauncher.DisconnectedInGame`), non "Connection failed".
 - Nell'editor PlayLocal usa `Builds/Windows/UNDERWORLD.exe`.
 
 ### Regole delle RPC
@@ -112,7 +114,13 @@ UNDERWORLD.exe -connect 127.0.0.1:7777 -name Bot1 -profile C:\tmp\bot1 -bot wand
 - **Regola**: `Physics.autoSyncTransforms` è spento. Dopo ogni spostamento diretto del transform di un personaggio chiama `ThirdPersonController.SyncCharacterController(cc)` (o spegni il controller durante lo spostamento). Senza questo il personaggio può tornare in (0,0,0) (bug risolto il 2026-11-27, test `PlayerSpawnSyncTests`).
 - Comandi: `IPlayerInput` (`KeyboardMouseInput` per le persone, `BotInput` per bot e test). Con `InputGate.GameplayBlocked` il controller ignora i comandi e la camera libera il mouse.
 - Camera (`ThirdPersonCamera`): segue il personaggio locale, blocca il mouse solo se `InputGate.GameplayBlocked` è falso, **non usa Esc** (Esc è della UI). `SetView(yaw, pitch)` gira la camera (test, filmati).
-- `MovementValidator` (server): credito di movimento (`MovementBudget`), a piedi 8,5 m/s, salita 6 m/s, discesa 55 m/s, 1,5 s di credito per la rete a scatti. Violazione → log, contatore, `CorrectPositionRpc` (SendTo.Owner) all'ultima posizione valida; 5 correzioni ignorate → disconnessione `movement_invalid`. API: `SetSpeedAllowance(chiave, velocità)` / `ClearSpeedAllowance` (veicoli), `ServerTeleport`.
+- `MovementValidator` (server): controlla ogni posizione ricevuta dal proprietario.
+  - Posizione finita (niente NaN o infinito) e dentro ±10 km: altrimenti violazione; un valore così non diventa mai l'ultima posizione valida.
+  - Credito di movimento (`MovementBudget`): a piedi 8,5 m/s, salita 6 m/s, discesa 55 m/s (al massimo 18 m in un colpo), 1,5 s di credito per la rete a scatti.
+  - Volo e caduta (`AirborneTracker`, spherecast del server sotto i piedi): al massimo 2,5 m sopra l'ultimo suolo; dopo 1 s in aria deve scendere (gravità minima 8 m/s²); niente discese più veloci di una caduta vera; sotto `minY` (-100 m) = fuori mappa.
+  - Violazione → log, `CorrectPositionRpc` all'ultima posizione valida (o all'ultimo suolo per il volo). La RPC è `[Rpc(SendTo.Owner, InvokePermission = RpcInvokePermission.Server)]` e il proprietario controlla anche `SenderClientId == ServerClientId`: un client non può spostare un altro giocatore.
+  - Durante una correzione le posizioni ricevute non contano: per il gioco del server vale `AuthoritativePosition` (il NetworkTransform continua a mostrare agli altri quella del client finché non torna). Chi non torna entro circa 1,8 s (3 × 0,6 s) o fa 4 violazioni in 30 s (finestra scorrevole, non si azzera tornando al punto) → disconnessione `movement_invalid`.
+  - API (solo server): `SetSpeedAllowance(chiave, orizzontale, salita, discesa, allowFlight)` / `ClearSpeedAllowance` (veicoli, scale), `ServerTeleport`.
 
 ## 6. Identità e sessione
 
@@ -186,7 +194,7 @@ Codice in `Runtime/UI/`, stili e asset in `Assets/UI/`, setup in `Editor/Steps/U
 - `PanelSettings` in `Assets/UI/Resources/Underworld/UiPanelSettings.asset`: scala con lo schermo, 1920×1080, match 0,5.
 - Tema `Assets/UI/Theme/UnderworldTheme.tss` + `Tokens.uss` (unico posto con colori, spazi 4/8/12/16/24/32, testo 14/16/20/28/40/64, raggi) + `Base.uss` + `Screens.uss`.
 - Carattere Inter (SIL OFL 1.1, licenza in `Assets/UI/Fonts/OFL.txt`). `InterTabular-SemiBold` ha le cifre a larghezza fissa (soldi).
-- Stile "vetro" (regole del vault): pannelli scuri semitrasparenti, bordo 1 px bianco al 15–20 %, angoli arrotondati, massimo 1–2 livelli di vetro per schermata, contrasto del testo almeno 4,5:1. Niente gradienti di sfondo, niente sottotitoli tutto maiuscolo, niente punto finale nei titoli; entrate ease-out 150–250 ms, uscite più corte del 20 %, pulsanti a scala 0,97 quando premuti.
+- Stile "vetro" (regole del vault): pannelli scuri semitrasparenti, bordo 1 px bianco al 15–20 %, angoli arrotondati, massimo 1–2 livelli di vetro per schermata, contrasto del testo almeno 4,5:1. Il progetto è in spazio colore Linear: le alfa dei token di vetro e velo sono già corrette per la miscela lineare (`Tokens.uss`); il testo che informa usa almeno 16 punti di riferimento (a 1280x720 la scala è 0,67). Niente gradienti di sfondo, niente sottotitoli tutto maiuscolo, niente punto finale nei titoli; entrate ease-out 150–250 ms, uscite più corte del 20 %, pulsanti a scala 0,97 quando premuti.
 
 **Schermate** (`UiScreenMachine` + `UiModeRules`, logica pura)
 - `InGame` → HUD. Scena `MainMenu` → menu. Avvio/connessione/trasferimento/errore fuori dal menu → caricamento a schermo pieno. Scena `Area_*` senza launcher → HUD.
@@ -290,6 +298,7 @@ Per lavorare in parallelo senza conflitti, un modulo aggiunge file suoi e non mo
 ## 15. Problemi noti
 
 - Il controllo di velocità lascia passare circa 1 s di trucco (credito di 14 m) prima di correggere. Da stringere in Fase 12 se serve.
+- Durante una correzione (al massimo circa 1,8 s) gli altri client vedono ancora la posizione mandata dal trucco: il server non blocca il NetworkTransform del proprietario. I moduli del server devono usare `MovementValidator.AuthoritativePosition`.
 - Il server non salva ancora niente e i soldi dell'HUD sono $0 (Fasi 5 e 6).
 - Il tunnel dentro le uscite è quasi nero (solo aspetto). Le piattaforme dell'autosalone sono vuote (le auto arriveranno dal modulo veicoli tramite `downtown.dealership.display.0..3`).
 - Navigazione con il gamepad tra i pulsanti della UI: solo il fuoco iniziale nella pausa.
