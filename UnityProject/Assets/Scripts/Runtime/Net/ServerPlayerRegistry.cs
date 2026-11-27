@@ -24,6 +24,10 @@ namespace Underworld.Net
         public bool Joined { get; internal set; }
         /// <summary>Il personaggio del giocatore (null prima dello spawn).</summary>
         public NetworkObject PlayerObject { get; internal set; }
+        /// <summary>Client con lo stesso playerId che questo ingresso sostituisce (sessione più nuova), o null.</summary>
+        public ServerPlayerEntry Replaces { get; internal set; }
+        /// <summary>Vero quando un client più nuovo con lo stesso playerId ha preso il posto di questo.</summary>
+        public bool Replaced { get; internal set; }
 
         internal readonly float ApprovedAtRealtime;
 
@@ -57,6 +61,15 @@ namespace Underworld.Net
         /// <summary>Il giocatore è uscito (solo se era entrato). Il personaggio sta per essere distrutto.</summary>
         public static event Action<ServerPlayerEntry> PlayerLeft;
 
+        /// <summary>
+        /// Client approvato (subito dopo l'approvazione, prima del caricamento dell'area).
+        /// Se Replaces non è null, quel client va scollegato (session_replaced).
+        /// </summary>
+        public static event Action<ServerPlayerEntry> PlayerApproved;
+
+        /// <summary>Client tolto dal registro (sempre, anche se non era mai entrato). Dopo PlayerLeft.</summary>
+        public static event Action<ServerPlayerEntry> PlayerRemoved;
+
         /// <summary>Tutti i giocatori approvati (anche quelli che stanno caricando).</summary>
         public static IReadOnlyList<ServerPlayerEntry> All => Entries;
 
@@ -83,13 +96,21 @@ namespace Underworld.Net
             return playerId != null && ByPlayerId.TryGetValue(playerId, out entry);
         }
 
-        internal static ServerPlayerEntry AddApproved(ulong clientId, string playerId, string name, string ticket)
+        internal static ServerPlayerEntry AddApproved(ulong clientId, string playerId, string name, string ticket,
+            ServerPlayerEntry replaces = null)
         {
             if (ByClient.ContainsKey(clientId)) Remove(clientId);
             var e = new ServerPlayerEntry(clientId, playerId, name, ticket);
+            if (replaces != null && replaces.PlayerId == playerId && replaces.ClientId != clientId)
+            {
+                e.Replaces = replaces;
+                replaces.Replaced = true;
+            }
             ByClient[clientId] = e;
             ByPlayerId[playerId] = e;
             Entries.Add(e);
+            try { PlayerApproved?.Invoke(e); }
+            catch (Exception ex) { Debug.LogException(ex); }
             return e;
         }
 
@@ -114,6 +135,8 @@ namespace Underworld.Net
                 try { PlayerLeft?.Invoke(e); }
                 catch (Exception ex) { Debug.LogException(ex); }
             }
+            try { PlayerRemoved?.Invoke(e); }
+            catch (Exception ex) { Debug.LogException(ex); }
             return e;
         }
 
@@ -130,6 +153,8 @@ namespace Underworld.Net
             Clear();
             PlayerJoined = null;
             PlayerLeft = null;
+            PlayerApproved = null;
+            PlayerRemoved = null;
         }
     }
 }

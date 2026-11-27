@@ -38,6 +38,8 @@ namespace Underworld.Net
         public string ListenAddress { get; private set; }
         public int MaxPlayers { get; private set; }
         public string DataDir { get; private set; }
+        /// <summary>Cartella di server.ready e server.stop (-rundir, default DataDir): serve quando più server condividono DataDir.</summary>
+        public string RunDir { get; private set; }
         public bool IsReady { get; private set; }
         public bool IsStopping { get; private set; }
 
@@ -73,18 +75,21 @@ namespace Underworld.Net
             ListenAddress = args.ListenAddress;
             MaxPlayers = Mathf.Clamp(args.GetInt("maxplayers", NetConstants.DefaultMaxPlayers), 1, 64);
             DataDir = string.IsNullOrEmpty(args.DataDir) ? Path.Combine(Application.persistentDataPath, "ServerData") : args.DataDir;
+            RunDir = string.IsNullOrEmpty(args.RunDir) ? DataDir : args.RunDir;
             _sceneName = AreaInfo.SceneName(Area);
 
             QualitySettings.vSyncCount = 0;
             Application.targetFrameRate = 60;
 
-            Debug.Log($"{NetConstants.ServerLog} Avvio: area {Area}, ascolto {ListenAddress}:{Port}, massimo {MaxPlayers} giocatori, dati in {DataDir}.");
+            Debug.Log($"{NetConstants.ServerLog} Avvio: area {Area}, ascolto {ListenAddress}:{Port}, massimo {MaxPlayers} giocatori, dati in {DataDir}" +
+                      (RunDir != DataDir ? $", file del processo in {RunDir}" : "") + ".");
 
             try
             {
                 Directory.CreateDirectory(DataDir);
-                _readyFile = Path.Combine(DataDir, NetConstants.ReadyFileName);
-                _stopFile = Path.Combine(DataDir, NetConstants.StopFileName);
+                Directory.CreateDirectory(RunDir);
+                _readyFile = Path.Combine(RunDir, NetConstants.ReadyFileName);
+                _stopFile = Path.Combine(RunDir, NetConstants.StopFileName);
                 // File rimasti da un avvio precedente: non devono ingannare chi aspetta.
                 if (File.Exists(_readyFile)) File.Delete(_readyFile);
                 if (File.Exists(_stopFile)) File.Delete(_stopFile);
@@ -157,13 +162,15 @@ namespace Underworld.Net
             }
             IsReady = true;
 
-            ServerModules.Start(new ServerContext
+            ServerModules.Start(new ServerStartInfo
             {
                 Area = Area,
                 Port = Port,
                 ListenAddress = ListenAddress,
                 MaxPlayers = MaxPlayers,
                 DataDir = DataDir,
+                RunDir = RunDir,
+                TestMode = LaunchArgs.Current.TestMode,
                 Network = _nm,
             });
 
@@ -222,6 +229,7 @@ namespace Underworld.Net
                 _approval.CurrentPlayers = ServerPlayerRegistry.Count;
                 _approval.IsPlayerIdInUse ??= id => ServerPlayerRegistry.TryGetByPlayerId(id, out _);
                 _approval.Validators = ServerApproval.Validators;
+                _approval.AllowReplace = ServerApproval.ReplacePolicy;
                 try
                 {
                     result = ConnectionApprovalRules.Evaluate(request.Payload, request.ClientNetworkId, _approval);
@@ -238,8 +246,11 @@ namespace Underworld.Net
 
             if (result.Approved)
             {
-                var entry = ServerPlayerRegistry.AddApproved(request.ClientNetworkId, result.PlayerId, result.Name, result.Ticket);
-                Debug.Log($"{NetConstants.ServerLog} Approvato: {entry} ({ServerPlayerRegistry.Count}/{MaxPlayers}).");
+                ServerPlayerRegistry.TryGetByPlayerId(result.PlayerId, out var replaced);
+                var entry = ServerPlayerRegistry.AddApproved(request.ClientNetworkId, result.PlayerId, result.Name, result.Ticket,
+                    result.ReplacesExisting ? replaced : null);
+                Debug.Log($"{NetConstants.ServerLog} Approvato: {entry} ({ServerPlayerRegistry.Count}/{MaxPlayers})" +
+                          (result.ReplacesExisting && replaced != null ? $", sostituisce il client {replaced.ClientId}." : "."));
             }
             else
             {

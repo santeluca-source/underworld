@@ -21,7 +21,17 @@ namespace Underworld.Net
 
         public static void RemoveValidator(IConnectionValidator validator) => ValidatorList.Remove(validator);
 
+        /// <summary>
+        /// Regola per lo stesso playerId già sul server (ApprovalContext.AllowReplace): true = il nuovo client
+        /// sostituisce il vecchio. Null = rifiuto already_connected. La imposta il modulo delle sessioni (Fase 5).
+        /// </summary>
+        public static System.Func<ConnectionCandidate, bool> ReplacePolicy { get; set; }
+
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        static void ResetStatics() => ValidatorList.Clear();
+        static void ResetStatics()
+        {
+            ValidatorList.Clear();
+            ReplacePolicy = null;
+        }
     }
 }

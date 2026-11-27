@@ -6,15 +6,22 @@ using UnityEngine;
 
 namespace Underworld.Net
 {
-    /// <summary>Dati del server che ricevono i moduli all'avvio.</summary>
-    public sealed class ServerContext
+    /// <summary>
+    /// Dati del server che ricevono i moduli all'avvio. (Fino alla Fase 4 si chiamava ServerContext:
+    /// quel nome ora è Underworld.Server.ServerContext, il contenitore dei servizi del server.)
+    /// </summary>
+    public sealed class ServerStartInfo
     {
         public AreaId Area;
         public ushort Port;
         public string ListenAddress;
         public int MaxPlayers;
-        /// <summary>Cartella dati del server (-datadir), già creata.</summary>
+        /// <summary>Cartella dati del server (-datadir), già creata. Più server possono condividerla.</summary>
         public string DataDir;
+        /// <summary>Cartella dei file di questo processo (server.ready, server.stop): -rundir, default DataDir.</summary>
+        public string RunDir;
+        /// <summary>Server avviato con -testmode (comandi di test permessi).</summary>
+        public bool TestMode;
         public NetworkManager Network;
     }
 
@@ -22,13 +29,13 @@ namespace Underworld.Net
     /// Servizio del server (contratto, sezione 13). Ogni classe non astratta con costruttore vuoto
     /// che implementa questa interfaccia viene creata da sola all'avvio del server.
     /// Ordine delle chiamate: OnServerStarted (area pronta) → OnPlayerJoined/OnPlayerLeft → OnServerStopping.
-    /// Esempi futuri: salvataggi (Fase 5), economia (Fase 6).
+    /// Esempio: Underworld.Server.ServerCoreModule (salvataggi, identità, economia, inventario).
     /// </summary>
     public interface IServerModule
     {
         /// <summary>Ordine di avvio: più basso = prima.</summary>
         int Order { get; }
-        void OnServerStarted(ServerContext context);
+        void OnServerStarted(ServerStartInfo info);
         void OnPlayerJoined(ServerPlayerEntry player);
         void OnPlayerLeft(ServerPlayerEntry player);
         /// <summary>Il server si chiude: ultimo momento per salvare.</summary>
@@ -43,7 +50,7 @@ namespace Underworld.Net
 
         public static IReadOnlyList<IServerModule> All => Modules;
 
-        internal static void Start(ServerContext context)
+        internal static void Start(ServerStartInfo context)
         {
             if (_started) return;
             _started = true;

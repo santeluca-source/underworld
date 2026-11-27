@@ -67,6 +67,9 @@ namespace Underworld.Core
         /// <summary>Cartella dati del server (-datadir). Null = cartella standard.</summary>
         public string DataDir => Get("datadir");
 
+        /// <summary>-rundir: cartella di server.ready/server.stop (default: DataDir). Per più server con la stessa DataDir.</summary>
+        public string RunDir => Get("rundir");
+
         /// <summary>File con l'elenco delle aree e dei loro indirizzi (-areas).</summary>
         public string AreasFile => Get("areas");
 

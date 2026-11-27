@@ -1,0 +1,51 @@
+/* Finestra Inventory (InventoryWindow). Solo token di Tokens.uss: niente colori nuovi. */
+
+.uw-inv__empty {
+    padding: var(--uw-space-5) 0 var(--uw-space-4) 0;
+}
+
+.uw-inv__empty > .uw-heading {
+    margin-bottom: var(--uw-space-2);
+}
+
+.uw-inv__row {
+    flex-direction: row;
+    align-items: center;
+    padding: var(--uw-space-3) var(--uw-space-4);
+    margin-bottom: var(--uw-space-2);
+    border-radius: var(--uw-radius-control);
+    background-color: var(--uw-surface);
+}
+
+.uw-inv__text {
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-width: 0;
+}
+
+.uw-inv__top {
+    flex-direction: row;
+    align-items: center;
+}
+
+.uw-inv__name {
+    -unity-font-definition: url("../../../UI/Fonts/Inter-SemiBold.ttf");
+    font-size: var(--uw-type-16);
+    color: var(--uw-text);
+    flex-shrink: 1;
+}
+
+.uw-inv__count {
+    font-size: var(--uw-type-16);
+    color: var(--uw-text-muted);
+    margin-left: var(--uw-space-2);
+}
+
+.uw-inv__desc {
+    margin-top: var(--uw-space-1);
+}
+
+.uw-inv__use {
+    margin-left: var(--uw-space-4);
+    flex-shrink: 0;
+}

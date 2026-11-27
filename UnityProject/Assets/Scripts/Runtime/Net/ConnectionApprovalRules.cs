@@ -15,13 +15,16 @@ namespace Underworld.Net
         public readonly string PlayerId;
         /// <summary>Nome normalizzato e valido.</summary>
         public readonly string Name;
+        /// <summary>Vero se questo playerId è già su questo server (riconnessione o seconda finestra).</summary>
+        public readonly bool PlayerIdInUse;
 
-        public ConnectionCandidate(ulong clientId, ConnectionPayload payload, string playerId, string name)
+        public ConnectionCandidate(ulong clientId, ConnectionPayload payload, string playerId, string name, bool playerIdInUse = false)
         {
             ClientId = clientId;
             Payload = payload;
             PlayerId = playerId;
             Name = name;
+            PlayerIdInUse = playerIdInUse;
         }
     }
 
@@ -34,7 +37,7 @@ namespace Underworld.Net
     {
         /// <summary>
         /// Null se il giocatore può entrare. Altrimenti il motivo del rifiuto nel formato
-        /// DisconnectReasons.Format(codice, testo in italiano).
+        /// DisconnectReasons.Format(codice, testo in inglese).
         /// </summary>
         string Validate(in ConnectionCandidate candidate);
     }
@@ -49,6 +52,11 @@ namespace Underworld.Net
         public Func<string, bool> IsPlayerIdInUse;
         /// <summary>Controlli aggiuntivi (può essere null).</summary>
         public IReadOnlyList<IConnectionValidator> Validators;
+        /// <summary>
+        /// Stesso playerId già sul server: true = il nuovo client sostituisce il vecchio (la sessione più nuova vince).
+        /// Null = rifiuto already_connected. Si chiama solo dopo i validatori (token già controllato).
+        /// </summary>
+        public Func<ConnectionCandidate, bool> AllowReplace;
     }
 
     /// <summary>Esito della decisione.</summary>
@@ -60,25 +68,30 @@ namespace Underworld.Net
         public readonly string PlayerId;
         public readonly string Name;
         public readonly string Ticket;
+        /// <summary>Approvato al posto di un client con lo stesso playerId (che va scollegato con session_replaced).</summary>
+        public readonly bool ReplacesExisting;
 
-        ApprovalResult(bool approved, string reason, string playerId, string name, string ticket)
+        ApprovalResult(bool approved, string reason, string playerId, string name, string ticket, bool replaces)
         {
             Approved = approved;
             Reason = reason;
             PlayerId = playerId;
             Name = name;
             Ticket = ticket;
+            ReplacesExisting = replaces;
         }
 
-        public static ApprovalResult Accept(string playerId, string name, string ticket) =>
-            new ApprovalResult(true, null, playerId, name, ticket);
+        public static ApprovalResult Accept(string playerId, string name, string ticket, bool replacesExisting = false) =>
+            new ApprovalResult(true, null, playerId, name, ticket, replacesExisting);
 
-        public static ApprovalResult Reject(string reason) => new ApprovalResult(false, reason, null, null, null);
+        public static ApprovalResult Reject(string reason) => new ApprovalResult(false, reason, null, null, null, false);
     }
 
     /// <summary>
     /// Decide se un client può entrare. Logica pura, senza Netcode: si prova in EditMode.
-    /// Ordine dei controlli: dimensione, JSON, versione, identità, nome, server pieno, doppio ingresso, validatori.
+    /// Ordine dei controlli: dimensione, JSON, versione, identità, nome, server pieno (solo per un playerId nuovo),
+    /// validatori (Fase 5: token e lucchetto), doppio ingresso (sostituzione se AllowReplace dice sì, altrimenti rifiuto).
+    /// Il doppio ingresso viene dopo i validatori: così la sostituzione avviene solo con il token giusto.
     /// </summary>
     public static class ConnectionApprovalRules
     {
@@ -106,15 +119,15 @@ namespace Underworld.Net
             if (!PlayerNameRules.TryNormalize(payload.Name, out string name))
                 return ApprovalResult.Reject(DisconnectReasons.NameInvalid);
 
-            if (ctx.CurrentPlayers >= ctx.MaxPlayers)
+            bool inUse = ctx.IsPlayerIdInUse != null && ctx.IsPlayerIdInUse(playerId);
+
+            // Chi sostituisce la sua sessione non occupa un posto in più.
+            if (!inUse && ctx.CurrentPlayers >= ctx.MaxPlayers)
                 return ApprovalResult.Reject(DisconnectReasons.ServerFull(ctx.CurrentPlayers, ctx.MaxPlayers));
 
-            if (ctx.IsPlayerIdInUse != null && ctx.IsPlayerIdInUse(playerId))
-                return ApprovalResult.Reject(DisconnectReasons.AlreadyConnected);
-
+            var candidate = new ConnectionCandidate(clientId, payload, playerId, name, inUse);
             if (ctx.Validators != null)
             {
-                var candidate = new ConnectionCandidate(clientId, payload, playerId, name);
                 for (int i = 0; i < ctx.Validators.Count; i++)
                 {
                     var v = ctx.Validators[i];
@@ -122,6 +135,13 @@ namespace Underworld.Net
                     string reason = v.Validate(candidate);
                     if (!string.IsNullOrEmpty(reason)) return ApprovalResult.Reject(reason);
                 }
+            }
+
+            if (inUse)
+            {
+                if (ctx.AllowReplace == null || !ctx.AllowReplace(candidate))
+                    return ApprovalResult.Reject(DisconnectReasons.AlreadyConnected);
+                return ApprovalResult.Accept(playerId, name, payload.Ticket, replacesExisting: true);
             }
 
             return ApprovalResult.Accept(playerId, name, payload.Ticket);

@@ -51,6 +51,12 @@ namespace Underworld.Net
         /// <summary>Testo (in inglese, ripulito) dell'ultimo motivo di rifiuto o disconnessione, o null.</summary>
         public string LastReasonText { get; private set; }
 
+        /// <summary>Codice del rifiuto dell'ultimo tentativo di connessione, anche se il launcher riprova (test, UI), o null.</summary>
+        public string LastAttemptReasonCode { get; private set; }
+
+        /// <summary>Tentativi di connessione rifiutati o senza risposta dall'avvio del processo (test).</summary>
+        public int FailedAttempts { get; private set; }
+
         /// <summary>Vero se l'ultimo errore è una disconnessione durante la partita (il menu mostra "Disconnected").</summary>
         public bool DisconnectedInGame { get; private set; }
 
@@ -301,6 +307,8 @@ namespace Underworld.Net
 
                 // Il client si è fermato: decidi se riprovare.
                 ParseReason(_rawReason, out string code, out string text);
+                LastAttemptReasonCode = code;
+                FailedAttempts++;
                 // already_connected: di solito è la sessione vecchia dopo un crash; il server la chiude dopo il timeout.
                 if (code == DisconnectReasons.AlreadyConnectedCode && !graceGiven)
                 {
