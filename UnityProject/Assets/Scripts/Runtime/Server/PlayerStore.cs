@@ -209,7 +209,7 @@ namespace Underworld.Server
                 if (outcome == PlayerSaveMigrations.Outcome.TooNew) return ReadOutcome.TooNew;
                 if (outcome != PlayerSaveMigrations.Outcome.Ok) return ReadOutcome.Corrupt;
                 save = root.ToObject<PlayerSave>(PlayerSave.Serializer);
-                problem = save?.Validate(playerId, _maxCash) ?? "file vuoto";
+                problem = save == null ? "file vuoto" : save.Validate(playerId, _maxCash);
                 if (problem != null) { save = null; return ReadOutcome.Corrupt; }
                 return ReadOutcome.Ok;
             }
