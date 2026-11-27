@@ -77,7 +77,11 @@ Misure: 60 FPS (vsync), 154–164 batch, Downtown costruita in ~0,2 s; server he
 
 ## 6. Lavoro in corso: fasi 5–6 (workflow di Claude avviato alle 19:20)
 
-Quando Claude ha scritto questo documento, il primo costruttore (persistenza) stava lavorando su main **senza commit** (cartelle nuove `Runtime/Server`, `Runtime/Economy`, `Runtime/Inventory` e modifiche in `Runtime/Net`). Se i crediti di Claude finiscono, il lavoro resta a metà.
+**Stato allo stop (2026-11-27 19:48, crediti di Claude all'87–90 %).** Claude ha fermato il workflow e salvato tutto su GitHub:
+- Commit `e2143f3`, `1078ec6`, `92cf376` (dopo `0f3252d`): file nuovi in `Runtime/Server` (ServerContext, SessionService, PlayerSession, PlayerSave, PlayerStore, IdentityHash, SessionLock, ServerTestHooks), `Runtime/Economy` (EconomyService, Money, PlayerWallet), `Runtime/Inventory` (InventoryService, ItemCatalog, PlayerInventory, InventoryWindow) e modifiche in `Runtime/Net` (approvazione, motivi, registro, launcher).
+- **Verificato allo stop**: compila; test EditMode **164/164** (29 nuovi: salvataggi, identità, lucchetti, economia, inventario).
+- **Non verificato**: setup, build e scenari multiplayer della Fase 5 (`persistence_roundtrip`, `identity_spoof_rejected`, `session_replaced`, `server_restart_persistence`, `lock_two_servers`, `testhooks_disabled`) forse non ancora scritti o non provati. Il punto 6.1 è quindi **in gran parte scritto ma da finire e provare**; 6.2, 6.3 e 6.4 non sono iniziati.
+- Primo passo consigliato per Codex: `Tools/unity.ps1 -Action setup`, `build`, poi `Tools/test.ps1 -Scenario all` (i vecchi 8 scenari devono restare verdi), poi scrivere e far passare gli scenari della Fase 5.
 
 **Prima di continuare:**
 1. Assicurati che il workflow di Claude sia fermo (l'app Claude chiusa o il workflow fermato), altrimenti due sviluppatori scrivono su main insieme.
