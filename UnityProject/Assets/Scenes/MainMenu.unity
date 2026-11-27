@@ -119,7 +119,7 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!1 &1839966459
+--- !u!1 &1621963257
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -127,61 +127,10 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1839966461}
-  - component: {fileID: 1839966460}
-  m_Layer: 0
-  m_Name: MenuBackdrop
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1839966460
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1839966459}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9b2098f5e07e2c64aa2fdfe64c62d1c1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Underworld.Runtime::Underworld.UI.MenuBackdrop
-  buildingMaterial: {fileID: 2100000, guid: 492e10b6ae466eb41b456468da6a1756, type: 2}
-  glowMaterial: {fileID: 2100000, guid: ca3e0f0bf4acdfb4da6efd1d36b7807b, type: 2}
-  groundMaterial: {fileID: 2100000, guid: dacff33748d4adb4092c3c9b44faf87c, type: 2}
-  skyMaterial: {fileID: 2100000, guid: 2ba2295871e19d14190f53777f3e8c87, type: 2}
-  targetCamera: {fileID: 2061896096}
-  seed: 1931
-  preset: 0
---- !u!4 &1839966461
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1839966459}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &2061896095
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 2061896099}
-  - component: {fileID: 2061896096}
-  - component: {fileID: 2061896098}
-  - component: {fileID: 2061896097}
+  - component: {fileID: 1621963261}
+  - component: {fileID: 1621963258}
+  - component: {fileID: 1621963260}
+  - component: {fileID: 1621963259}
   m_Layer: 0
   m_Name: MenuCamera
   m_TagString: MainCamera
@@ -189,13 +138,13 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!20 &2061896096
+--- !u!20 &1621963258
 Camera:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2061896095}
+  m_GameObject: {fileID: 1621963257}
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 2
@@ -240,13 +189,13 @@ Camera:
   m_OcclusionCulling: 1
   m_StereoConvergence: 10
   m_StereoSeparation: 0.022
---- !u!114 &2061896097
+--- !u!114 &1621963259
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2061896095}
+  m_GameObject: {fileID: 1621963257}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a79441f348de89743a2939f4d699eac1, type: 3}
@@ -284,21 +233,72 @@ MonoBehaviour:
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
   m_Version: 2
---- !u!81 &2061896098
+--- !u!81 &1621963260
 AudioListener:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2061896095}
+  m_GameObject: {fileID: 1621963257}
   m_Enabled: 1
---- !u!4 &2061896099
+--- !u!4 &1621963261
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2061896095}
+  m_GameObject: {fileID: 1621963257}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1827749936
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1827749938}
+  - component: {fileID: 1827749937}
+  m_Layer: 0
+  m_Name: MenuBackdrop
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1827749937
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1827749936}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b2098f5e07e2c64aa2fdfe64c62d1c1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Underworld.Runtime::Underworld.UI.MenuBackdrop
+  buildingMaterial: {fileID: 2100000, guid: 492e10b6ae466eb41b456468da6a1756, type: 2}
+  glowMaterial: {fileID: 2100000, guid: ca3e0f0bf4acdfb4da6efd1d36b7807b, type: 2}
+  groundMaterial: {fileID: 2100000, guid: dacff33748d4adb4092c3c9b44faf87c, type: 2}
+  skyMaterial: {fileID: 2100000, guid: 2ba2295871e19d14190f53777f3e8c87, type: 2}
+  targetCamera: {fileID: 1621963258}
+  seed: 1931
+  preset: 0
+--- !u!4 &1827749938
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1827749936}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
@@ -311,5 +311,5 @@ Transform:
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
-  - {fileID: 2061896099}
-  - {fileID: 1839966461}
+  - {fileID: 1621963261}
+  - {fileID: 1827749938}

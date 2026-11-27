@@ -1,0 +1,12 @@
+{
+  "description": "Pia entra (profilo nuovo, $5,000), i comandi di test le danno $12,345 e oggetti, usa uno snack, esce; rientra con lo stesso profilo (altro nome): soldi, HUD e inventario uguali. Il server controlla disco, registro e lucchetto.",
+  "timeoutSec": 150,
+  "servers": [
+    { "area": "TestGround", "autotest": "persist.server", "args": ["-testmode", "-expect-joins", "2", "-expect-cash", "12345", "-expect-items", "test.snack=2,test.rock=1"] }
+  ],
+  "clients": [
+    { "name": "Pia", "autotest": "persist.first", "graphics": false, "args": ["-set-cash", "12345"] },
+    { "name": "PiaAgain", "profile": "Pia", "startAfterExit": ["Pia"], "autotest": "persist.check", "graphics": true,
+      "args": ["-expect-cash", "12345", "-expect-items", "test.snack=2,test.rock=1"] }
+  ]
+}

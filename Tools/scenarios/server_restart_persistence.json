@@ -1,0 +1,13 @@
+{
+  "description": "Rex riceve $4,242 e 2 sassi; il server si chiude con server.stop mentre Rex è dentro (salvataggio di ServerStopping); un server nuovo con la stessa cartella dati: Rex rientra con tutto, righe del registro presenti.",
+  "timeoutSec": 180,
+  "servers": [
+    { "area": "TestGround", "sharedDataDir": "shared", "autotest": "restart.before", "args": ["-testmode"] },
+    { "area": "TestGround", "sharedDataDir": "shared", "deferred": true, "replaces": 0, "autotest": "restart.after" }
+  ],
+  "clients": [
+    { "name": "Rex", "server": 0, "autotest": "restart.first", "graphics": false, "args": ["-set-cash", "4242"] },
+    { "name": "RexAgain", "profile": "Rex", "server": 1, "startAfterInGame": ["Rex"], "delaySec": 5, "autotest": "persist.check", "graphics": false,
+      "args": ["-expect-cash", "4242", "-expect-items", "test.rock=2"] }
+  ]
+}

@@ -35,6 +35,7 @@ namespace Underworld.Testing.Scenarios
         {
             if (code == DisconnectReasons.NameInvalidCode) return "Invalid name";
             if (code == DisconnectReasons.ServerFullCode) return "Server is full";
+            if (code == DisconnectReasons.IdentityInvalidCode) return "Your player profile could not be verified";
             return null;
         }
     }

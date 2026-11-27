@@ -1,0 +1,16 @@
+{
+  "description": "Real entra; Fake usa lo stesso playerId con un altro token mentre Real è dentro: rifiutato (identity_invalid) e Real resta. Fake2 ci riprova con Real fuori: rifiutato. Real rientra: dati intatti.",
+  "timeoutSec": 150,
+  "servers": [
+    { "area": "TestGround", "autotest": "spoof.server" }
+  ],
+  "clients": [
+    { "name": "Real", "autotest": "stay_in_game", "graphics": false, "holdUntilExited": ["Fake"] },
+    { "name": "Fake", "profileFrom": "Real", "tamperToken": true, "startAfterInGame": ["Real"], "autotest": "expect_reject", "graphics": false,
+      "args": ["-expect-reason", "identity_invalid"] },
+    { "name": "FakeTwo", "profileFrom": "Real", "tamperToken": true, "startAfterExit": ["Real"], "autotest": "expect_reject", "graphics": false,
+      "args": ["-expect-reason", "identity_invalid"] },
+    { "name": "RealAgain", "profile": "Real", "startAfterExit": ["FakeTwo"], "autotest": "persist.check", "graphics": false,
+      "args": ["-expect-cash", "5000"] }
+  ]
+}

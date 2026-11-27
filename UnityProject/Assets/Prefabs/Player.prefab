@@ -694,6 +694,9 @@ GameObject:
   - component: {fileID: 8210466693809436320}
   - component: {fileID: 1159338501520417446}
   - component: {fileID: 9185860159780112540}
+  - component: {fileID: 2508159342278598789}
+  - component: {fileID: 8994735961291127918}
+  - component: {fileID: 686589759923362754}
   m_Layer: 2
   m_Name: Player
   m_TagString: Untagged
@@ -913,6 +916,45 @@ MonoBehaviour:
   m_EditorClassIdentifier: Underworld.Runtime::Underworld.Player.PlayerNetwork
   ShowTopMostFoldoutHeaderGroup: 1
   nameplateHeight: 2.25
+--- !u!114 &2508159342278598789
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7474772557389578138}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 051888621aa9a834683a759c763915f3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Underworld.Runtime::Underworld.Economy.PlayerWallet
+  ShowTopMostFoldoutHeaderGroup: 1
+--- !u!114 &8994735961291127918
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7474772557389578138}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ac721a45227db6c4593591cec9a9566d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Underworld.Runtime::Underworld.Inventory.PlayerInventory
+  ShowTopMostFoldoutHeaderGroup: 1
+--- !u!114 &686589759923362754
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7474772557389578138}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: faa9ee218c858c242b20f0998dffec4f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Underworld.Runtime::Underworld.Testing.PlayerTestHooks
+  ShowTopMostFoldoutHeaderGroup: 1
 --- !u!1 &7891076976550891384
 GameObject:
   m_ObjectHideFlags: 0

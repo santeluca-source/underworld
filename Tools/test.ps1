@@ -13,11 +13,17 @@
   Formato del file di scenario:
   {
     "timeoutSec": 120,
-    "servers": [ { "area": "TestGround", "autotest": "<nome>", "args": ["-maxplayers", "2"] } ],
+    "servers": [ { "area": "TestGround", "autotest": "<nome>", "args": ["-maxplayers", "2"],
+                   "sharedDataDir": "dati",           (cartella dati comune a più server; ogni server ha la sua rundir)
+                   "deferred": true, "replaces": 0 } ],  (parte quando un client lo usa; prima chiude il server 0)
     "clients": [ { "name": "Alfa", "autotest": "<nome>", "graphics": false,
                    "server": 0,                       (indice del server; -1 = nessun -connect)
                    "startAfterInGame": ["Uno"],       (parte quando questi client sono in gioco)
                    "holdUntilOthersDone": true,       (riceve -autotest-release: finisce dopo gli altri)
+                   "holdUntilExited": ["Due"],        (come sopra, ma rilasciato quando questi client sono usciti)
+                   "startAfterExit": ["Uno"],         (parte quando questi client sono usciti)
+                   "profile": "Uno",                  (stessa identità di un altro client: stesso giocatore)
+                   "profileFrom": "Uno", "tamperToken": true,  (stesso playerId, token diverso: finto giocatore)
                    "delaySec": 0, "args": [] } ],
     "checkChildExit": { "client": "Locale", "withinSec": 10 },   (pid in data.childPid del risultato)
     "extraLogs": ["{tmp}/localserver/server.log"]
@@ -122,7 +128,7 @@ function Invoke-Scenario([string]$file, [int]$index, [string]$runDir) {
     $tmp = Join-Path $runDir $name
     New-Item -ItemType Directory -Force $tmp | Out-Null
     $base = $PortBase + $index * 10
-    if ($base + 9 -gt 7799) { throw "Porte fuori dall'intervallo 7700-7799 (scenario $name, base $base)." }
+    if ($base + 9 -gt 7899) { throw "Porte fuori dall'intervallo 7700-7899 (scenario $name, base $base)." }
     $timeout = if ($TimeoutSec -gt 0) { $TimeoutSec } elseif ($spec.timeoutSec) { [int]$spec.timeoutSec } else { 120 }
     $procTimeout = [Math]::Max(20, $timeout - 10)
 
@@ -135,7 +141,7 @@ function Invoke-Scenario([string]$file, [int]$index, [string]$runDir) {
     }.GetNewClosure()
 
     $rows = New-Object System.Collections.ArrayList
-    $procs = @()   # { Kind, Label, Proc, Log, Out, DataDir, Hold, Release }
+    $procs = @()   # { Kind, Label, Proc, Log, Out, RunDir, DataDir, Hold, HoldFor, Released, Release }
     $notes = New-Object System.Collections.ArrayList
     $failed = $false
     $childPid = 0
@@ -145,14 +151,32 @@ function Invoke-Scenario([string]$file, [int]$index, [string]$runDir) {
 
     try {
         # ---- Server ----
+        # Ogni server ha la sua cartella di processo (rundir: server.ready, server.stop). La cartella dati è la stessa
+        # se "sharedDataDir" ha lo stesso nome (più server sui salvataggi comuni, come le aree vere).
+        # "deferred": true = parte solo quando un client lo usa; "replaces": N = prima chiude il server N
+        # (server.stop) e aspetta che esca (riavvio con gli stessi dati).
         $servers = As-Array $spec.servers
-        for ($i = 0; $i -lt $servers.Count; $i++) {
+        $serverProcs = @{}
+        $startServer = {
+            param([int]$i)
             $s = $servers[$i]
+            if ($null -ne $s.replaces) {
+                $old = $serverProcs[[int]$s.replaces]
+                if ($old -and -not $old.Proc.HasExited) {
+                    try { Set-Content -Path (Join-Path $old.RunDir "server.stop") -Value "stop" } catch {}
+                    $op = $old.Proc
+                    $gone = Wait-Until { $op.HasExited } 20
+                    if (-not $gone) { [void]$notes.Add("$($old.Label) non si chiude con server.stop prima del riavvio") }
+                    Write-Host "    $($old.Label) chiuso (codice $(if ($op.HasExited) { $op.ExitCode } else { '?' }))"
+                }
+            }
             $port = $base + $i
-            $dataDir = Join-Path $tmp "server$i"
+            $runDirS = Join-Path $tmp "server$i"
+            $dataDir = if ($s.sharedDataDir) { Join-Path $tmp ([string]$s.sharedDataDir) } else { $runDirS }
+            New-Item -ItemType Directory -Force $runDirS | Out-Null
             New-Item -ItemType Directory -Force $dataDir | Out-Null
             $log = Join-Path $tmp "server$i.log"
-            $a = @("-server", "-area", $s.area, "-port", [string]$port, "-listen", "127.0.0.1", "-datadir", $dataDir,
+            $a = @("-server", "-area", $s.area, "-port", [string]$port, "-listen", "127.0.0.1", "-datadir", $dataDir, "-rundir", $runDirS,
                    "-batchmode", "-nographics", "-logFile", $log)
             $out = $null
             if ($s.autotest) {
@@ -161,22 +185,51 @@ function Invoke-Scenario([string]$file, [int]$index, [string]$runDir) {
             }
             foreach ($x in (As-Array $s.args)) { $a += (& $expand ([string]$x)) }
             $p = Start-Game $a
-            Write-Host "    server$i avviato (pid $($p.Id), porta $port, area $($s.area))"
-            $procs += [pscustomobject]@{ Kind = "server"; Label = "server$i"; Proc = $p; Log = $log; Out = $out; DataDir = $dataDir; Hold = $false; Release = $null; Name = "server$i" }
+            Write-Host "    server$i avviato (pid $($p.Id), porta $port, area $($s.area)$(if ($s.sharedDataDir) { ', dati ' + $s.sharedDataDir }))"
+            $entry = [pscustomobject]@{ Kind = "server"; Label = "server$i"; Proc = $p; Log = $log; Out = $out; RunDir = $runDirS; DataDir = $dataDir; Hold = $false; HoldFor = @(); Released = $false; Release = $null; Name = "server$i" }
+            $serverProcs[$i] = $entry
+            return $entry
         }
-        foreach ($sp in ($procs | Where-Object { $_.Kind -eq "server" })) {
-            $ready = Join-Path $sp.DataDir "server.ready"
+        $waitReady = {
+            param($sp)
+            $ready = Join-Path $sp.RunDir "server.ready"
             $proc = $sp.Proc
             $ok = Wait-Until { (Test-Path $ready) -or $proc.HasExited } 90
             if (-not (Test-Path $ready)) {
-                $failed = $true
                 [void]$notes.Add("$($sp.Label) non è diventato pronto")
                 throw "server non pronto"
             }
             Write-Host "    $($sp.Label) pronto"
         }
+        for ($i = 0; $i -lt $servers.Count; $i++) {
+            if ($servers[$i].deferred) { continue }
+            $procs += (& $startServer $i)
+        }
+        foreach ($sp in @($procs | Where-Object { $_.Kind -eq "server" })) { & $waitReady $sp }
+
+        # Rilascio dei client che aspettano ("holdUntilOthersDone"): con "holdUntilExited": [nomi] quando quei
+        # client sono usciti, altrimenti quando tutti gli altri client sono usciti (solo dopo l'avvio di tutti).
+        $pumpReleases = {
+            param([bool]$allStarted)
+            $clientProcs = @($procs | Where-Object { $_.Kind -eq "client" })
+            foreach ($h in ($clientProcs | Where-Object { $_.Hold -and -not $_.Released })) {
+                $go = $false
+                if (@($h.HoldFor).Count -gt 0) {
+                    $go = $true
+                    foreach ($n in $h.HoldFor) {
+                        $t = $clientProcs | Where-Object { $_.Name -eq $n } | Select-Object -First 1
+                        if (-not $t -or -not $t.Proc.HasExited) { $go = $false }
+                    }
+                } elseif ($allStarted) {
+                    $go = @($clientProcs | Where-Object { -not $_.Hold -and -not $_.Proc.HasExited }).Count -eq 0
+                }
+                if ($go) { Set-Content -Path $h.Release -Value "release"; $h.Released = $true }
+            }
+        }
 
         # ---- Client ----
+        # "profile": cartella dell'identità condivisa (stesso giocatore in più client); "profileFrom" + "tamperToken":
+        # copia l'identità di un altro client con un token diverso (finto giocatore); "startAfterExit": [nomi].
         $clients = As-Array $spec.clients
         foreach ($c in $clients) {
             foreach ($dep in (As-Array $c.startAfterInGame)) {
@@ -184,42 +237,67 @@ function Invoke-Scenario([string]$file, [int]$index, [string]$runDir) {
                 if (-not $depProc) { throw "startAfterInGame: client '$dep' sconosciuto o non ancora avviato" }
                 $ing = $depProc.Out + ".ingame"
                 $dp = $depProc.Proc
-                $ok = Wait-Until { (Test-Path $ing) -or $dp.HasExited } 90
+                $ok = Wait-Until { & $pumpReleases $false; (Test-Path $ing) -or $dp.HasExited } 90
                 if (-not (Test-Path $ing)) { [void]$notes.Add("$dep non è arrivato in gioco"); $failed = $true }
+            }
+            foreach ($dep in (As-Array $c.startAfterExit)) {
+                $depProc = $procs | Where-Object { $_.Kind -eq "client" -and $_.Name -eq $dep } | Select-Object -First 1
+                if (-not $depProc) { throw "startAfterExit: client '$dep' sconosciuto o non ancora avviato" }
+                $dp = $depProc.Proc
+                $ok = Wait-Until { & $pumpReleases $false; $dp.HasExited } 90
+                if (-not $ok) { [void]$notes.Add("$dep non è uscito in tempo"); $failed = $true }
             }
             if ($c.delaySec) { Start-Sleep -Seconds ([double]$c.delaySec) }
             $cname = [string]$c.name
             $safe = ($cname -replace '[^A-Za-z0-9_-]', '_')
             if ($safe -eq "") { $safe = "client" }
+            $profileKey = if ($c.profile) { ([string]$c.profile -replace '[^A-Za-z0-9_-]', '_') } else { $safe }
+            $profileDir = Join-Path $tmp "profile_$profileKey"
+            if ($c.profileFrom) {
+                $src = Join-Path (Join-Path $tmp ("profile_" + ([string]$c.profileFrom -replace '[^A-Za-z0-9_-]', '_'))) "identity.json"
+                if (-not (Test-Path $src)) { throw "profileFrom: identità di '$($c.profileFrom)' non trovata ($src)" }
+                New-Item -ItemType Directory -Force $profileDir | Out-Null
+                $idj = (Get-Content $src -Raw -Encoding UTF8) | ConvertFrom-Json
+                if ($c.tamperToken) {
+                    $bytes = New-Object byte[] 32
+                    [Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($bytes)
+                    $idj.token = [Convert]::ToBase64String($bytes)
+                }
+                [IO.File]::WriteAllText((Join-Path $profileDir "identity.json"), ($idj | ConvertTo-Json -Compress), (New-Object Text.UTF8Encoding($false)))
+            }
             $log = Join-Path $tmp "client_$safe.log"
             $out = Join-Path $tmp "client_$safe.result.json"
-            $a = @("-name", $cname, "-profile", (Join-Path $tmp "profile_$safe"), "-logFile", $log,
+            $a = @("-name", $cname, "-profile", $profileDir, "-logFile", $log,
                    "-autotest", $c.autotest, "-autotest-out", $out, "-autotest-timeout", [string]$procTimeout)
             if ($c.graphics) { $a += @("-screen-width", "960", "-screen-height", "540", "-screen-fullscreen", "0", "-monitor", "2") }  # schermo 2: l'utente lavora sul primo
             else { $a += @("-batchmode", "-nographics") }
             $serverIndex = if ($null -ne $c.server) { [int]$c.server } else { 0 }
-            if ($serverIndex -ge 0) { $a += @("-connect", ("127.0.0.1:" + [string]($base + $serverIndex))) }
+            if ($serverIndex -ge 0) {
+                if (-not $serverProcs.ContainsKey($serverIndex)) {
+                    $sp = & $startServer $serverIndex
+                    $procs += $sp
+                    & $waitReady $sp
+                }
+                $a += @("-connect", ("127.0.0.1:" + [string]($base + $serverIndex)))
+            }
             $release = $null
-            if ($c.holdUntilOthersDone) {
+            $holdFor = @(As-Array $c.holdUntilExited)
+            $hold = [bool]$c.holdUntilOthersDone -or $holdFor.Count -gt 0
+            if ($hold) {
                 $release = Join-Path $tmp "release_$safe"
                 $a += @("-autotest-release", $release)
             }
             foreach ($x in (As-Array $c.args)) { $a += (& $expand ([string]$x)) }
             $p = Start-Game $a
             Write-Host "    client $cname avviato (pid $($p.Id), $(if ($c.graphics) { 'con grafica' } else { 'senza grafica' }), scenario $($c.autotest))"
-            $procs += [pscustomobject]@{ Kind = "client"; Label = "client $cname"; Proc = $p; Log = $log; Out = $out; DataDir = $null; Hold = [bool]$c.holdUntilOthersDone; Release = $release; Name = $cname }
+            $procs += [pscustomobject]@{ Kind = "client"; Label = "client $cname"; Proc = $p; Log = $log; Out = $out; RunDir = $null; DataDir = $null; Hold = $hold; HoldFor = $holdFor; Released = $false; Release = $release; Name = $cname }
         }
 
         # ---- Attesa dei client ----
         $deadline = (Get-Date).AddSeconds($timeout)
-        $released = $false
         while ($true) {
+            & $pumpReleases $true
             $clientProcs = @($procs | Where-Object { $_.Kind -eq "client" })
-            $others = @($clientProcs | Where-Object { -not $_.Hold })
-            if (-not $released -and @($others | Where-Object { -not $_.Proc.HasExited }).Count -eq 0) {
-                foreach ($h in ($clientProcs | Where-Object { $_.Hold })) { Set-Content -Path $h.Release -Value "release" }
-                $released = $true
-            }
             if (@($clientProcs | Where-Object { -not $_.Proc.HasExited }).Count -eq 0) { break }
             if ((Get-Date) -gt $deadline) {
                 $failed = $true
@@ -265,7 +343,7 @@ function Invoke-Scenario([string]$file, [int]$index, [string]$runDir) {
         # ---- Chiusura dei server: file server.stop, poi Kill ----
         foreach ($sp in ($procs | Where-Object { $_.Kind -eq "server" })) {
             if (-not $sp.Proc.HasExited) {
-                try { Set-Content -Path (Join-Path $sp.DataDir "server.stop") -Value "stop" } catch {}
+                try { Set-Content -Path (Join-Path $sp.RunDir "server.stop") -Value "stop" } catch {}
             }
         }
         foreach ($sp in ($procs | Where-Object { $_.Kind -eq "server" })) {

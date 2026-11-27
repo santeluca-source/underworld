@@ -1,0 +1,15 @@
+{
+  "description": "Due server con la stessa cartella dati. Lena è sul server 0: sul server 1 lo stesso giocatore è rifiutato (already_connected). Lena esce: sul server 1 entra con i dati del server 0.",
+  "timeoutSec": 180,
+  "servers": [
+    { "area": "TestGround", "sharedDataDir": "shared", "autotest": "lock.first_server", "args": ["-testmode"] },
+    { "area": "TestGround", "sharedDataDir": "shared", "autotest": "lock.second_server", "args": ["-expect-cash", "3131"] }
+  ],
+  "clients": [
+    { "name": "Lena", "server": 0, "autotest": "lock.holder", "graphics": false, "holdUntilExited": ["LenaProbe"], "args": ["-set-cash", "3131"] },
+    { "name": "LenaProbe", "profile": "Lena", "server": 1, "startAfterInGame": ["Lena"], "delaySec": 3, "autotest": "expect_retry_reject", "graphics": false,
+      "args": ["-expect-reason", "already_connected"] },
+    { "name": "LenaAgain", "profile": "Lena", "server": 1, "startAfterExit": ["Lena"], "autotest": "persist.check", "graphics": false,
+      "args": ["-expect-cash", "3131"] }
+  ]
+}

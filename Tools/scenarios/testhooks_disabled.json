@@ -1,0 +1,10 @@
+{
+  "description": "Server normale (senza -testmode): set_cash, give_item e state di Mallory sono rifiutati, i soldi restano $5,000 e l'inventario vuoto.",
+  "timeoutSec": 100,
+  "servers": [
+    { "area": "TestGround", "autotest": "hooks.disabled_server" }
+  ],
+  "clients": [
+    { "name": "Mallory", "autotest": "hooks.disabled_client", "graphics": false, "args": ["-expect-cash", "5000"] }
+  ]
+}

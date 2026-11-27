@@ -1,0 +1,12 @@
+{
+  "description": "First entra e riceve $7,777; lo stesso giocatore entra da un secondo client: First viene scollegato con session_replaced, Second entra con $7,777 (dati intatti).",
+  "timeoutSec": 120,
+  "servers": [
+    { "area": "TestGround", "autotest": "replaced.server", "args": ["-testmode", "-expect-cash", "7777"] }
+  ],
+  "clients": [
+    { "name": "First", "autotest": "replaced.first", "graphics": false, "args": ["-set-cash", "7777"] },
+    { "name": "Second", "profile": "First", "startAfterInGame": ["First"], "delaySec": 4, "autotest": "persist.check", "graphics": false,
+      "args": ["-expect-cash", "7777"] }
+  ]
+}
