@@ -94,6 +94,11 @@ namespace Underworld.Testing.Scenarios
         {
             var kb = Keyboard.current;
             if (kb == null) yield break;
+            // La finestra del test può non avere il fuoco (schermo 2): l'Input System spegnerebbe la tastiera.
+            if (InputSystem.settings.backgroundBehavior != InputSettings.BackgroundBehavior.IgnoreFocus)
+                InputSystem.settings.backgroundBehavior = InputSettings.BackgroundBehavior.IgnoreFocus;
+            if (!kb.enabled) InputSystem.EnableDevice(kb);
+            yield return null;
             InputSystem.QueueStateEvent(kb, new KeyboardState(key));
             yield return null;
             yield return null;
@@ -166,6 +171,7 @@ namespace Underworld.Testing.Scenarios
 
             // Misura su 10 s con i due giocatori dentro.
             var proc = Process.GetCurrentProcess();
+            using var sysMem = ProfilerRecorder.StartNew(ProfilerCategory.Memory, "System Used Memory");
             TimeSpan cpu0 = proc.TotalProcessorTime;
             float t0 = Time.realtimeSinceStartup;
             int frames = 0;
@@ -173,12 +179,14 @@ namespace Underworld.Testing.Scenarios
             proc.Refresh();
             float wall = Time.realtimeSinceStartup - t0;
             double cpuPct = (proc.TotalProcessorTime - cpu0).TotalSeconds / Math.Max(0.001, wall) * 100.0;
-            ctx.SetData("serverWorkingSetMB", Math.Round(proc.WorkingSet64 / 1048576.0));
-            ctx.SetData("serverPrivateMB", Math.Round(proc.PrivateMemorySize64 / 1048576.0));
+            long systemUsed = sysMem.Valid ? sysMem.LastValue : 0;
+            long reserved = UnityEngine.Profiling.Profiler.GetTotalReservedMemoryLong();
+            ctx.SetData("serverSystemUsedMB", Math.Round(systemUsed / 1048576.0));
+            ctx.SetData("serverUnityReservedMB", Math.Round(reserved / 1048576.0));
             ctx.SetData("serverManagedMB", Math.Round(GC.GetTotalMemory(false) / 1048576.0, 1));
             ctx.SetData("serverCpuPercentOneCore", Math.Round(cpuPct, 1));
             ctx.SetData("serverFrameRate", Math.Round(frames / Math.Max(0.001, wall)));
-            ctx.Log($"Misure server: memoria {proc.WorkingSet64 / 1048576} MB (privata {proc.PrivateMemorySize64 / 1048576} MB), CPU {cpuPct:0.0}% di un core, {frames / wall:0} frame/s");
+            ctx.Log($"Misure server: memoria di sistema {systemUsed / 1048576} MB, riservata da Unity {reserved / 1048576} MB, CPU {cpuPct:0.0}% di un core, {frames / wall:0} frame/s");
         }
     }
 
@@ -248,7 +256,7 @@ namespace Underworld.Testing.Scenarios
             if (other != null && Camera.main != null)
             {
                 Vector3 dir = other.transform.position - me.transform.position;
-                Camera.main.GetComponent<ThirdPersonCamera>()?.SetView(Mathf.Atan2(dir.x, dir.z) * Mathf.Rad2Deg + 12f, 10f);
+                Camera.main.GetComponent<ThirdPersonCamera>()?.SetView(Mathf.Atan2(dir.x, dir.z) * Mathf.Rad2Deg - 10f, 10f);
             }
             HudBus.SetObjective("Check the mission board");
             yield return ctx.Wait(1.2f);
