@@ -138,6 +138,18 @@ namespace Underworld.Net
         void OnLoadEventCompleted(string sceneName, LoadSceneMode mode, List<ulong> completed, List<ulong> timedOut)
         {
             if (IsReady || sceneName != _sceneName) return;
+
+            // Un'area costruita a codice deve avere il mondo e almeno un punto di spawn:
+            // senza, i giocatori nascerebbero nel vuoto. Errore fatale, niente server.ready.
+            var areaBuilder = Underworld.World.AreaBuilder.Current;
+            int spawns = AreaAnchors.OfKind(AnchorKind.Spawn).Count;
+            if (areaBuilder != null && (!areaBuilder.IsBuilt || spawns == 0))
+            {
+                Debug.LogError($"{NetConstants.ServerLog} Costruzione dell'area {Area} fallita " +
+                               $"(mondo costruito: {areaBuilder.IsBuilt}, punti di spawn: {spawns}). Chiudo il server.");
+                StopServer("costruzione area fallita", 1);
+                return;
+            }
             IsReady = true;
 
             ServerModules.Start(new ServerContext
@@ -150,7 +162,6 @@ namespace Underworld.Net
                 Network = _nm,
             });
 
-            int spawns = AreaAnchors.OfKind(AnchorKind.Spawn).Count;
             WriteReadyFile();
             Debug.Log($"{NetConstants.ServerReadyMarker}: area {Area} ({_sceneName}) su {ListenAddress}:{Port}, punti di spawn: {spawns}.");
             try { ServerReady?.Invoke(); }

@@ -69,6 +69,12 @@ namespace Underworld.World
             catch (Exception e)
             {
                 Debug.LogError($"[World] Costruzione dell'area {area} fallita: {e}");
+                // Niente mondo a metà nella scena (WorldBuilder ha già liberato le risorse create).
+                if (root != null)
+                {
+                    if (Application.isPlaying) Destroy(root.gameObject);
+                    else DestroyImmediate(root.gameObject);
+                }
                 return null;
             }
             if (Result.Graphics) HudBus.SetArea(AreaInfo.DisplayName(area));

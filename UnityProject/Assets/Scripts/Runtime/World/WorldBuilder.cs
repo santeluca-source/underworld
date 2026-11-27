@@ -87,7 +87,17 @@ namespace Underworld.World
 
             int seed = options.Seed != 0 ? options.Seed : defaultSeed;
             var ctx = new BuildContext(area, seed, root, art, options.Graphics, options.ChunkSize);
-            builder.Build(ctx);
+            try
+            {
+                builder.Build(ctx);
+            }
+            catch
+            {
+                // Costruzione fallita a metà: libera mesh, materiali e texture già creati e svuota la radice.
+                ReleaseObjects(ctx.Owned);
+                ClearChildren(root);
+                throw;
+            }
 
             var result = new BuildResult
             {
@@ -157,13 +167,29 @@ namespace Underworld.World
         {
             if (result == null) return;
             if (result.NavSurface != null) result.NavSurface.RemoveData();
-            foreach (var o in result.Owned)
+            ReleaseObjects(result.Owned);
+        }
+
+        static void ReleaseObjects(List<UnityEngine.Object> owned)
+        {
+            foreach (var o in owned)
             {
                 if (o == null) continue;
                 if (Application.isPlaying) UnityEngine.Object.Destroy(o);
                 else UnityEngine.Object.DestroyImmediate(o);
             }
-            result.Owned.Clear();
+            owned.Clear();
+        }
+
+        static void ClearChildren(Transform root)
+        {
+            if (root == null) return;
+            for (int i = root.childCount - 1; i >= 0; i--)
+            {
+                var child = root.GetChild(i).gameObject;
+                if (Application.isPlaying) UnityEngine.Object.Destroy(child);
+                else UnityEngine.Object.DestroyImmediate(child);
+            }
         }
     }
 }
