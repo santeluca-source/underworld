@@ -893,9 +893,12 @@ MonoBehaviour:
   maxUpSpeed: 6
   maxDownSpeed: 55
   burstSeconds: 1.5
+  minY: -100
   correctionTolerance: 1
-  resendAfterSeconds: 2
-  maxIgnoredCorrections: 5
+  resendAfterSeconds: 0.6
+  maxIgnoredCorrections: 3
+  maxViolationsInWindow: 4
+  violationWindowSeconds: 30
 --- !u!114 &9185860159780112540
 MonoBehaviour:
   m_ObjectHideFlags: 0
