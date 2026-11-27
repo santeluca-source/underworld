@@ -1,4 +1,4 @@
-# Architettura di UNDERWORLD
+﻿# Architettura di UNDERWORLD
 
 Questo documento è il contratto tecnico del progetto. Ogni modulo lo segue.
 Se una scelta cambia, aggiorna questo file e `Docs/DECISIONS.md`.
@@ -217,3 +217,31 @@ Note della traccia NET (rete, giocatore, test automatici = Fase 4). Scritte il 2
 - Il blocco di tutti i processi visto insieme al caso (0,0,0) il 2026-11-26 alle 21:36 coincide con l'intervallo in cui uno script esterno chiudeva tutti gli `UNDERWORLD.exe` del PC (21:00-21:40): i log finiscono nello stesso secondo. Non si è più visto.
 - Il controllo di velocità lascia passare circa 1 s di trucco (credito di 14 m) prima di correggere. Da stringere in Fase 12 se serve.
 - `AreaAnchor` è stato spostato nel file `Runtime/Core/AreaAnchor.cs` (stessi membri): nel file `AreaAnchors.cs` Unity non lo salvava nelle scene ("script mancante").
+## Note WORLD
+
+Traccia WORLD (costruzione del mondo a runtime + arte). Codice in `Runtime/World/`, setup in `Editor/Steps/World/`.
+
+**Arte**
+- Kit Kenney (CC0) in `Assets/Art/Kenney/` (CarKit, FactoryKit, NatureKit), crediti in `Assets/Art/Kenney/CREDITS.md`.
+- `KenneyImport` (AssetPostprocessor) e `WorldArtStep` (setup, ordine 150) creano materiali URP in `Assets/Art/World/Materials` (niente rosa).
+- `Resources/World/ArtLibrary.asset`: un elemento per modello con id stabile (es. `car.sedan`), bounds misurati e scala alla misura reale (auto ~4.3 m).
+
+**Costruzione**
+- Una classe per area: `[AreaBuilderFor(AreaId.X, Seed = n)] public sealed class XBuilder : IAreaBuilder`. Il registro (`AreaBuilderRegistry`) la trova per riflessione: chi aggiunge un'area non modifica i file di WORLD.
+- `BuildContext`: `Box`, `Prism`, `Model(id, ...)`, `Collider`, `Anchor(nome, tipo, pos, yaw, raggio, data)`, `Light`, `Text`, `PreviewShot`. Il generatore casuale è `ctx.Rng` (seme fisso): non usare `UnityEngine.Random`.
+- Id dei punti speciali: `<area>.<nome>` (es. `downtown.bank.vault`). Id duplicato = eccezione.
+- `MeshCombiner` unisce le mesh per materiale in pezzi di ~64 m (indici a 32 bit).
+- `AreaBuilder` (nella scena) costruisce in `Awake`, poi lancia l'evento statico `AreaBuilder.WorldBuilt`. Per chi arriva dopo: `AreaBuilder.WhenBuilt(callback)`.
+- Server headless (`-server` o `-nographics`): solo collider e punti speciali. NavMesh solo sul server, dopo il mondo, con il tempo nel log.
+- Log: `[World] Built Downtown in X ms: renderers=..., colliders=..., anchors=...` e `[World] NavMesh Downtown in X ms`.
+
+**Downtown** (`Areas/DowntownBuilder.cs`, seme 1337, ~300 x 300 m)
+- Uscite visibili (portali con scritta): industriale a est, periferia a nord, campagna a sud; `Data` = AreaId di arrivo. Muri invisibili sul bordo, aperti alle uscite.
+- 42 punti speciali: spawn.0..7, arrival.from_*, exit.*, police.station/spawn.0..3/release, bank.lobby/vault, dealership.main/display.0..3/exit, shop.general, robbery.store0, clothing.main, garage.public/spawn.0..3, property.apt0..3, mission.board, hideout.drop.
+- Misure (2026-11-27, build Windows): client 262 ms, headless 106 ms, NavMesh 225-303 ms; 145 renderer, 1029 collider; 31-175 batch nelle viste di anteprima.
+
+**Anteprima**
+- `UNDERWORLD.exe -preview -preview-out <cartella> [-area Downtown] [-preview-shots a,b] [-preview-navmesh] -screen-width 1280 -screen-height 720 -screen-fullscreen 0 -logFile <file>`
+- Salva un PNG per ogni `PreviewShot` dell'area e scrive nel log batch, triangoli e FPS, poi chiude.
+
+**Test EditMode** (`Assets/Tests/EditMode/WorldTests.cs`): determinismo (hash operazioni e geometria), headless senza renderer, id unici, punti richiesti, uscite verso le aree giuste, punti su terreno calpestabile e non dentro i collider.
